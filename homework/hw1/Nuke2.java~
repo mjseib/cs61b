@@ -1,0 +1,4 @@
+import java.io.*;
+
+class Nuke2 {
+    public static void main() throws Exception {
