@@ -51,19 +51,9 @@ class Date {
    *  @return true if and only if the input year is a leap year.
    */
   public static boolean isLeapYear(int year) {
-      if(year%4 == 0){
-	  if(year%100==0){
-	      if(year%400==0){
-		  return true;
-	      }
-	      else{
-		  return false;
-	      }
-	  }
-	  else{
-	      return true;
-	  }
-      } else{
+      if(((year%4 == 0) && !(year%100 == 0) )|| (year %400 == 0)){
+	  return true;
+      } else {
 	  return false;
       }
   }
@@ -175,7 +165,7 @@ class Date {
   public int dayInYear() {
       int numDays = this.day;
       for(int i=1; i<this.month; i++){
-	  numDays += daysInMonth(this.month, this.year);
+	  numDays += daysInMonth(i, this.year);
       }
       return numDays;
   }
@@ -185,9 +175,11 @@ class Date {
    *  If this Date occurs before d, the result is negative.
    *  @return the difference in days between d and this date.
    */
-  Public int difference(Date d) {
+  public int difference(Date d) {
       int multiplier;
       int dayDiff = Math.abs(d.beginOfTime() - this.beginOfTime());
+      System.out.println("d: " + d.beginOfTime());
+      System.out.println("this: " + this.beginOfTime());
       if(this.isBefore(d)){
 	  multiplier = -1;
       } else if(this.isAfter(d)){
@@ -198,7 +190,7 @@ class Date {
       return multiplier*dayDiff;
   }
 
-  Private int daysInYear(int year){
+  private int daysInYear(int year){
       if(isLeapYear(year)){
 	  return 366;
       } else{
@@ -206,7 +198,7 @@ class Date {
       }
   }
 	
-    Private int beginOfTime(){
+    private int beginOfTime(){
 	int numDays=0;
 	/// Calculate the days in year
 	for(int i=1; i<year; i++){
@@ -270,6 +262,18 @@ class Date {
                        d2.isBefore(d1));
     System.out.println(d3 + " before " + d2 + " should be false: " + 
                        d3.isBefore(d2));
+
+    /*    System.out.println("\nDebugging days in month.");
+    for(int i=1; i<13; i++){
+	System.out.println("Month " + i + " has " + daysInMonth(i,1800) + "days.");
+    }*/
+
+    // Debugging begin of time
+    Date day1 = new Date("3/10/1");
+    Date day2 = new Date("1/1/1");
+    System.out.println("\nDebugging beginOfTime");
+    System.out.println(day1 + " should be: " + day1.beginOfTime());
+    System.out.println(day2 + " should be: " + day2.beginOfTime());
 
     System.out.println("\nTesting difference.");
     System.out.println(d1 + " - " + d1  + " should be 0: " + 
