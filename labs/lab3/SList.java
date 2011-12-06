@@ -11,6 +11,7 @@
 public class SList {
 
   private SListNode head;
+    private SListNode tail;
   private int size;
 
   /**
@@ -20,6 +21,7 @@ public class SList {
   public SList() {
     size = 0;
     head = null;
+    tail = null;
   }
 
   /**
@@ -46,7 +48,17 @@ public class SList {
    **/
 
   public void insertFront(Object obj) {
-    head = new SListNode(obj, head);
+      SListNode tempNode = new SListNode(obj);
+      
+      if(size==0){
+	  tail = tempNode;
+	  head = tempNode;
+      } else{
+	  tempNode.next = head;
+	  head.prev = tempNode;
+	  head = tempNode;
+      }
+
     size++;
   }
 
@@ -56,16 +68,18 @@ public class SList {
    **/
 
   public void insertEnd(Object obj) {
-    if (head == null) {
-      head = new SListNode(obj);
-    } else {
-      SListNode node = head;
-      while (node.next != null) {
-        node = node.next;
+      SListNode tempNode = new SListNode(obj);
+
+      if(size==0){
+	  head = tempNode;
+	  tail = tempNode;
+      } else{
+	  tempNode.prev = tail;
+	  tail.next = tempNode;
+	  tail = tempNode;
       }
-      node.next = new SListNode(obj);
-    }
-    size++;
+      
+      size++;
   }
 
   /**
@@ -123,8 +137,16 @@ public class SList {
    **/
 
   public static void main (String[] args) {
-    // Fill in your solution for Part I here.
+      SList list1 = new SList();
 
+      list1.insertEnd(6);
+      list1.insertEnd(9);
+      list1.insertEnd(12);
+      System.out.println("\nList should be [ 6 9 12 ]: "+list1);
+      list1.insertEnd(15);
+      list1.insertFront(3);
+      System.out.println("List should be [ 3 6 9 12 15 ]: "+list1);
+      
     testEmpty();
     testAfterInsertFront();
     testAfterInsertEnd();

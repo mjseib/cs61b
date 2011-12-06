@@ -12,6 +12,7 @@
 class SListNode {
   Object item;
   SListNode next;
+    SListNode prev;
 
   /**
    *  SListNode() (with one parameter) constructs a list node referencing the
@@ -21,6 +22,7 @@ class SListNode {
   SListNode(Object obj) {
     item = obj;
     next = null;
+    prev = null;
   }
 
   /**
@@ -31,6 +33,8 @@ class SListNode {
   SListNode(Object obj, SListNode next) {
     item = obj;
     this.next = next;
+    this.prev = next.prev;
+    next.prev = this;
   }
 
 }
