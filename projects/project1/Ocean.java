@@ -165,9 +165,12 @@ public class Ocean {
   	private void emptyUpdate(int x, int y, Ocean next) {
   		int[] counter = animalAround(x,y);
   		if(counter[1] < 2) {
+  			//less than two fish, do nothing
   		} else if(counter[1] > 1 && counter[0] == 1) {
+  			//2+ fish and only 1 shark, new fish
   			next.addFish(x, y);
   		} else if(counter[1] > 1 && counter[0] > 1) {
+  			//2+ fish and 2+ shark, new shark
   			next.addShark(x, y);
   		}
   	}
@@ -175,18 +178,28 @@ public class Ocean {
     private void sharkUpdate(int x, int y, Ocean next) {
     	int[] counter = animalAround(x,y);
     	if(counter[1] > 0) {
+    		//if there's a fish, the shark stays well
     		next.addShark(x, y);
     	} else if(counter[1] == 0) {
-    		next.addSharkDying(x,y, ((Shark) gridData[x][y]).dyingTime() -1);
+    		if((((Shark) gridData[x][y]).dyingTime())-1 < 0) {
+    			//do nothing, the shark dies
+    		} else {
+    			//add a shark that has one less time
+    			next.addSharkDying(x,y, ((Shark) gridData[x][y]).dyingTime() -1);
+    		}
     	}
     }
 
     private void fishUpdate(int x, int y, Ocean next) {
     	int[] counter = animalAround(x,y);
     	if(counter[0]==0) {
+    		//if there are no sharks, the fish stays alive
     		next.addFish(x,y);
     	} else if(counter[0] > 1) {
+    		//if there are more than one shark, new shark spawns
     		next.addShark(x,y);
+    	} else {
+    		//do nothing
     	}
     }
     
