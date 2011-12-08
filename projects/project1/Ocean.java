@@ -25,6 +25,11 @@ public class Ocean {
   public final static int SHARK = 1;
   public final static int FISH = 2;
 
+    private int width;
+    private int height;
+    private int starveTime;
+    private Animal[][] gridData;
+
   /**
    *  Define any variables associated with an Ocean object here.  These
    *  variables MUST be private.
@@ -46,6 +51,10 @@ public class Ocean {
 
   public Ocean(int i, int j, int starveTime) {
     // Your solution here.
+      width = i;
+      height = j;
+      this.starveTime = starveTime;
+      gridData = new Animal[i][j];
   }
 
   /**
@@ -54,8 +63,7 @@ public class Ocean {
    */
 
   public int width() {
-    // Replace the following line with your solution.
-    return 1;
+      return this.width;
   }
 
   /**
@@ -64,8 +72,7 @@ public class Ocean {
    */
 
   public int height() {
-    // Replace the following line with your solution.
-    return 1;
+      return this.height;
   }
 
   /**
@@ -75,7 +82,7 @@ public class Ocean {
 
   public int starveTime() {
     // Replace the following line with your solution.
-    return 1;
+      return this.starveTime;
   }
 
   /**
@@ -86,7 +93,10 @@ public class Ocean {
    */
 
   public void addFish(int x, int y) {
-    // Your solution here.
+      int[] spacePos = checkOffGrid(x,y);
+      if(gridData[spacePos[0]][spacePos[1]] == null) {
+    	  gridData[spacePos[0]][spacePos[1]] = new Animal(2);
+      }
   }
 
   /**
@@ -98,7 +108,14 @@ public class Ocean {
    */
 
   public void addShark(int x, int y) {
-    // Your solution here.
+      int[] spacePos = checkOffGrid(x,y);
+      if(gridData[spacePos[0]][spacePos[1]] == null) {
+    	  gridData[spacePos[0]][spacePos[1]] = new Shark(starveTime);
+      }
+  }
+  
+  private void addSharkDying(int x, int y, int dyingTime) {
+	  gridData[x][y] = new Shark(dyingTime);
   }
 
   /**
@@ -109,8 +126,12 @@ public class Ocean {
    */
 
   public int cellContents(int x, int y) {
-    // Replace the following line with your solution.
-    return EMPTY;
+      int[] spacePos = checkOffGrid(x,y);
+      if(gridData[spacePos[0]][spacePos[1]] == null) {
+    	  return 0;
+      } else {
+    	  return gridData[spacePos[0]][spacePos[1]].getType();
+      }
   }
 
   /**
@@ -119,9 +140,80 @@ public class Ocean {
    */
 
   public Ocean timeStep() {
-    // Replace the following line with your solution.
-    return new Ocean(1, 1, 1);
+      // Replace the following line with your solution.
+      Ocean nextOcean = new Ocean(width, height, starveTime);
+      int content;
+      for(int i=0; i<width; i++) {
+    	  for(int j=0; j<height; j++) {
+    		  content = cellContents(i,j);
+    		  switch (content) {
+    		  case 0: //empty
+    			  emptyUpdate(i, j, nextOcean);
+    			  break;
+    		  case 1: //shark
+    			  sharkUpdate(i, j, nextOcean);
+    			  break;
+    		  case 2: //fish
+    			  fishUpdate(i, j, nextOcean);
+    			  break;
+    		  }
+    	  }	
+      }
+      return nextOcean;
   }
+
+  	private void emptyUpdate(int x, int y, Ocean next) {
+  		int[] counter = animalAround(x,y);
+  		if(counter[1] < 2) {
+  		} else if(counter[1] > 1 && counter[0] == 1) {
+  			next.addFish(x, y);
+  		} else if(counter[1] > 1 && counter[0] > 1) {
+  			next.addShark(x, y);
+  		}
+  	}
+  
+    private void sharkUpdate(int x, int y, Ocean next) {
+    	int[] counter = animalAround(x,y);
+    	if(counter[1] > 0) {
+    		next.addShark(x, y);
+    	} else if(counter[1] == 0) {
+    		next.addSharkDying(x,y, ((Shark) gridData[x][y]).dyingTime() -1);
+    	}
+    }
+
+    private void fishUpdate(int x, int y, Ocean next) {
+    	int[] counter = animalAround(x,y);
+    	if(counter[0]==0) {
+    		next.addFish(x,y);
+    	} else if(counter[0] > 1) {
+    		next.addShark(x,y);
+    	}
+    }
+    
+    private int[] animalAround(int x, int y) {
+    	int[] count = {0,0}; //0 index is shark and 1 index is fish
+    	for(int i=-1; i<2; i++) {
+    		for(int j=-1; j<2; j++) {
+    			if(i==0&&j==0) {
+    				
+    			} else {
+    				int searchX = i+x;
+    				int searchY = j+y;
+    				if(cellContents(searchX, searchY) == 1) {
+    					count[0]++;
+    				} else if(cellContents(searchX, searchY) == 2) {
+    					count[1]++;
+    				}
+    			}	
+    		}
+    	}
+    	return count;
+    }
+    
+    private int[] checkOffGrid(int x, int y) {
+	int[] actualPos = {Math.abs(x)%width,Math.abs(y)%height};
+	return actualPos;
+    }
 
   /**
    *  The following method is required for Part II.
