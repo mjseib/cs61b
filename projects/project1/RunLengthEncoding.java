@@ -27,8 +27,12 @@ public class RunLengthEncoding {
    *  Define any variables associated with a RunLengthEncoding object here.
    *  These variables MUST be private.
    */
-
-
+	
+	private DList runList;
+	private DListNode currNode = null;
+	private int starveTime;
+	private int i;
+	private int j;
 
   /**
    *  The following methods are required for Part II.
@@ -45,6 +49,10 @@ public class RunLengthEncoding {
 
   public RunLengthEncoding(int i, int j, int starveTime) {
     // Your solution here.
+	  this.i = i;
+	  this.j = j;
+	  this.starveTime = starveTime;
+	  runList = new DList(0, this.i*this.j);
   }
 
   /**
@@ -66,7 +74,13 @@ public class RunLengthEncoding {
 
   public RunLengthEncoding(int i, int j, int starveTime,
                            int[] runTypes, int[] runLengths) {
-    // Your solution here.
+	  this.i = i;
+	  this.j = j;
+	  this.starveTime = starveTime;
+	  runList = new DList();
+	  for(int k=0; k<runTypes.length; k++) {
+		  runList.insertBack(runTypes[k], runLengths[k]);
+	  }
   }
 
   /**
@@ -94,6 +108,7 @@ public class RunLengthEncoding {
 
   public void restartRuns() {
     // Your solution here.
+	  currNode = null;
   }
 
   /**
@@ -106,8 +121,18 @@ public class RunLengthEncoding {
    */
 
   public TypeAndSize nextRun() {
-    // Replace the following line with your solution.
-    return new TypeAndSize(Ocean.EMPTY, 1);
+	  if(currNode == null) {
+		  currNode = runList.head;
+	  } 
+	  currNode = currNode.next;
+	  if(currNode.next == runList.head) {
+		  return null;
+	  }
+	  if(currNode.aniType == null) {
+		  return new TypeAndSize(Ocean.EMPTY, currNode.aniLength);
+	  } else {
+		  return new TypeAndSize(currNode.aniType.getType(), currNode.aniLength);
+	  }
   }
 
   /**
@@ -118,8 +143,35 @@ public class RunLengthEncoding {
    */
 
   public Ocean toOcean() {
-    // Replace the following line with your solution.
-    return new Ocean(1, 1, 1);
+	  Ocean sea = new Ocean(i, j, starveTime);
+	  int indexTrack = 0;
+	  int listSize = runList.getSize();
+	  TypeAndSize currData;
+	  
+	  for(int k = 0; k < listSize; k++) {
+		  currData = nextRun();
+		  int aniType = currData.type;
+		  int aniSize = currData.size;
+		  for(int count = 0; count < aniSize; count++) {
+			  int [] tuple = getTuple(indexTrack);
+			  if(aniType == 1) {
+				  sea.addShark(tuple[0], tuple[1]);
+				  //should be sea.addShark(tuple[0], tuple[1], starveTime);
+			  } else if(aniType == 2) {
+				  sea.addFish(tuple[0], tuple[1]);
+			  } 
+			  indexTrack++;
+		  }
+	  }
+	  return sea;
+  }
+  
+  private int[] getTuple(int index) {
+	  int[] tuple = {0, 0};
+	  tuple[1] = index/i;
+	  tuple[0] = index%i;
+	  
+	  return tuple;
   }
 
   /**
