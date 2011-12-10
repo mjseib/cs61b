@@ -1,3 +1,5 @@
+import java.util.Arrays;
+
 /* Ocean.java */
 
 /**
@@ -113,10 +115,6 @@ public class Ocean {
     	  gridData[spacePos[0]][spacePos[1]] = new Shark(starveTime);
       }
   }
-  
-  private void addSharkDying(int x, int y, int dyingTime) {
-	  gridData[x][y] = new Shark(dyingTime);
-  }
 
   /**
    *  cellContents() returns EMPTY if cell (x, y) is empty, FISH if it contains
@@ -166,7 +164,7 @@ public class Ocean {
   		int[] counter = animalAround(x,y);
   		if(counter[1] < 2) {
   			//less than two fish, do nothing
-  		} else if(counter[1] > 1 && counter[0] == 1) {
+  		} else if(counter[1] > 1 && counter[0] < 2) {
   			//2+ fish and only 1 shark, new fish
   			next.addFish(x, y);
   		} else if(counter[1] > 1 && counter[0] > 1) {
@@ -178,14 +176,14 @@ public class Ocean {
     private void sharkUpdate(int x, int y, Ocean next) {
     	int[] counter = animalAround(x,y);
     	if(counter[1] > 0) {
-    		//if there's a fish, the shark stays well
+    		//if there's a fish, the shark becomes well fed
     		next.addShark(x, y);
     	} else if(counter[1] == 0) {
     		if((((Shark) gridData[x][y]).dyingTime())-1 < 0) {
     			//do nothing, the shark dies
     		} else {
     			//add a shark that has one less time
-    			next.addSharkDying(x,y, ((Shark) gridData[x][y]).dyingTime() -1);
+    			next.addShark(x,y, ((Shark) gridData[x][y]).dyingTime() -1);
     		}
     	}
     }
@@ -210,12 +208,13 @@ public class Ocean {
     			if(i==0&&j==0) {
     				
     			} else {
-    				int searchX = i+x;
-    				int searchY = j+y;
-    				if(cellContents(searchX, searchY) == 1) {
+    				int[] searchPos = {i+x, j+y};
+    				if(cellContents(searchPos[0], searchPos[1]) == 1) {
     					count[0]++;
-    				} else if(cellContents(searchX, searchY) == 2) {
+    				} else if(cellContents(searchPos[0], searchPos[1]) == 2) {
     					count[1]++;
+    				} else {
+    					//if there isnt a shark or a fish, do nothing
     				}
     			}	
     		}
@@ -224,8 +223,26 @@ public class Ocean {
     }
     
     private int[] checkOffGrid(int x, int y) {
-	int[] actualPos = {Math.abs(x)%width,Math.abs(y)%height};
-	return actualPos;
+    	int[] actualPos = {0,0};
+    	if(x<0) {
+    		actualPos[0] = width + x%width;
+    	} else {
+    		actualPos[0] = Math.abs(x)%width;
+    	}
+    	if(y<0) {
+    		actualPos[1] = height + y%height;
+    	} else {
+    		actualPos[1] = Math.abs(y)%height;
+    	}
+    	return actualPos;
+    }
+    
+    public static void main(String[] args) {
+    	Ocean sea = new Ocean(4, 4, 2);
+    	sea.addShark(4,1);
+    	System.out.println(sea.cellContents(0,0));
+    	System.out.println("Should be a 1: "+sea.cellContents(0,1));
+    	System.out.println("Should be a 1: "+sea.cellContents(4,1));
     }
 
   /**
@@ -248,6 +265,9 @@ public class Ocean {
 
   public void addShark(int x, int y, int feeding) {
     // Your solution here.
+	  if(gridData[x][y] == null) {
+		  gridData[x][y] = new Shark(feeding);
+	  }
   }
 
   /**

@@ -4,7 +4,7 @@ public class Shark extends Animal{
 	protected int timeUntilDeath;
 	
 	public Shark(int starveTime) {
-		super(2);
+		super(1);
 		timeUntilDeath = starveTime;
 	}
 	
