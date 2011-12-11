@@ -79,7 +79,11 @@ public class RunLengthEncoding {
 	  this.starveTime = starveTime;
 	  runList = new DList();
 	  for(int k=0; k<runTypes.length; k++) {
-		  runList.insertBack(runTypes[k], runLengths[k]);
+		  if(runTypes[k] == 1) {
+			  runList.insertBack(runTypes[k], runLengths[k], starveTime);
+		  } else {
+			  runList.insertBack(runTypes[k], runLengths[k]);
+		  }
 	  }
   }
 
@@ -125,9 +129,10 @@ public class RunLengthEncoding {
 		  currNode = runList.head;
 	  } 
 	  currNode = currNode.next;
-	  if(currNode.next == runList.head) {
+	  // This was to reach the end of the list
+	  /*if(currNode.next == runList.head) {
 		  return null;
-	  }
+	  }*/
 	  if(currNode.aniType == null) {
 		  return new TypeAndSize(Ocean.EMPTY, currNode.aniLength);
 	  } else {
@@ -154,8 +159,7 @@ public class RunLengthEncoding {
 		  int aniType = currData.type;
 		  int aniSize = currData.size;
 		  if(aniType == 1) {
-			  Animal currShark = currNode.aniType;
-			  feeding = ((Shark)currShark).dyingTime();
+			  feeding = ((Shark) currNode.aniType).dyingTime();
 		  }
 		  for(int count = 0; count < aniSize; count++) {
 			  int[] tuple = getTuple(indexTrack);
@@ -197,6 +201,7 @@ public class RunLengthEncoding {
 	  starveTime = sea.starveTime();
 	  i=sea.width();
 	  j=sea.height();
+	  runList = new DList();
 	  boolean sameAsPrev = true;
 	  int size = i*j;
 	  int aniCounter=1;
@@ -219,9 +224,9 @@ public class RunLengthEncoding {
 					  aniCounter++;
 				  } else if(sea.sharkFeeding(tuple[0], tuple[1]) != prevDeath) {
 					  sameAsPrev = false;
-				  } else {
-					  aniCounter++;
 				  }
+			  } else {
+				  aniCounter++;
 			  }
 		  } else if(currType != prevType) {
 			  sameAsPrev = false;
@@ -240,6 +245,11 @@ public class RunLengthEncoding {
 			  }
 		  }
 	  }
+	  if(prevType == 1) {
+		  runList.insertBack(prevType,aniCounter,prevDeath);
+	  } else {
+		  runList.insertBack(prevType, aniCounter);
+	  }
 	  check();
   }
 
@@ -257,9 +267,25 @@ public class RunLengthEncoding {
    */
 
   public void addFish(int x, int y) {
-    // Your solution here, but you should probably leave the following line
-    //   at the end.
-    check();
+	  int index = x*i+y;
+	  int listSize = runList.getSize();
+	  int prevIndex = 0;
+	  int currIndex = 0;
+	  TypeAndSize currData;
+	  
+	  for(int m=0; m<listSize; m++) {
+		  currData = nextRun();
+		  currIndex += currData.size;
+		  if(index > prevIndex && index < currIndex) {
+			  if(currNode.aniType == null) {
+				  runList.insertAfterNode(2, 1, currNode);
+				  runList.insertAfterNode(0, currIndex-index-1, currNode.next);
+				  currNode.aniLength=index - prevIndex;
+			  } 
+			  break;
+		  }
+	  }
+	  check();
   }
 
   /**
@@ -274,8 +300,24 @@ public class RunLengthEncoding {
    */
 
   public void addShark(int x, int y) {
-    // Your solution here, but you should probably leave the following line
-    //   at the end.
+	  int index = x*i+y;
+	  int listSize = runList.getSize();
+	  int prevIndex = 0;
+	  int currIndex = 0;
+	  TypeAndSize currData;
+	  
+	  for(int m=0; m<listSize; m++) {
+		  currData = nextRun();
+		  currIndex += currData.size;
+		  if(index > prevIndex && index < currIndex) {
+			  if(currNode.aniType == null) {
+				  runList.insertAfterNode(2, 1, starveTime, currNode);
+				  runList.insertAfterNode(0, currIndex-index-1, currNode.next);
+				  currNode.aniLength=index - prevIndex;
+			  } 
+			  break;
+		  }
+	  }
     check();
   }
 
@@ -290,6 +332,8 @@ public class RunLengthEncoding {
 	  int sizeHolder = 0;
 	  TypeAndSize currData;
 	  int listSize = runList.getSize();
+	  System.out.println("This is totSize: " + totSize);
+	  currNode = null;
 	  for(int i=0; i<listSize; i++) {
 		  currData = nextRun();
 		  sizeHolder+=currData.size;
@@ -304,14 +348,17 @@ public class RunLengthEncoding {
 			  }
 		  }
 	  }
+	  System.out.println("This is sizeHolder: " + sizeHolder);
 	  if(sizeHolder!=totSize) {
 		  System.out.println("Wrong SIZES WITH DLIST AND OCEAN LENGTH");
 	  }
   }
   
   public static void main(String[] argv) {
-	  Ocean sea = new Ocean(3,3,3);
-	  RunLengthEncoding RLE = new RunLengthEncoding(sea);
-	  RLE.check();
+	  int i=3;
+	  int j=3;
+	  int starvetime = 3;
+	  RunLengthEncoding RLE = new RunLengthEncoding(i,j,starvetime);
+	  RLE.addShark(1,1);
   }
 }

@@ -20,6 +20,25 @@ public class DList {
 		size++;
 	}
 	
+	public void insertAfterNode(int type, int length, DListNode curr) {
+		DListNode newNode = new DListNode(type, length);
+		newNode.next = curr.next;
+		newNode.prev = curr;
+		curr.next.prev = newNode;
+		curr.next = newNode;
+		size++;
+	}
+	
+	public void insertAfterNode(int type, int length, int deathTime, DListNode curr) {
+		DListNode newNode = new DListNode(type, length, deathTime);
+		newNode.next = curr.next;
+		newNode.prev = curr;
+		curr.next.prev = newNode;
+		curr.next = newNode;
+		size++;
+	}
+	
+	
 	public void insertFront(int type, int length) {
 		DListNode tempNode = new DListNode(type, length);
 		if(size ==0) {
