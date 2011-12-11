@@ -153,7 +153,7 @@ public class RunLengthEncoding {
 	  int listSize = runList.getSize();
 	  int feeding=0;
 	  TypeAndSize currData;
-	  
+	  currNode = null;
 	  for(int k = 0; k < listSize; k++) {
 		  currData = nextRun();
 		  int aniType = currData.type;
@@ -272,7 +272,7 @@ public class RunLengthEncoding {
 	  int prevIndex = 0;
 	  int currIndex = 0;
 	  TypeAndSize currData;
-	  
+	  currNode = null;
 	  for(int m=0; m<listSize; m++) {
 		  currData = nextRun();
 		  currIndex += currData.size;
@@ -284,6 +284,7 @@ public class RunLengthEncoding {
 			  } 
 			  break;
 		  }
+		  prevIndex=currIndex;
 	  }
 	  check();
   }
@@ -300,12 +301,12 @@ public class RunLengthEncoding {
    */
 
   public void addShark(int x, int y) {
-	  int index = x*i+y;
+	  int index = y*i+x;
 	  int listSize = runList.getSize();
 	  int prevIndex = 0;
 	  int currIndex = 0;
 	  TypeAndSize currData;
-	  
+	  currNode = null;
 	  for(int m=0; m<listSize; m++) {
 		  currData = nextRun();
 		  currIndex += currData.size;
@@ -317,6 +318,7 @@ public class RunLengthEncoding {
 			  } 
 			  break;
 		  }
+		  prevIndex = currIndex;
 	  }
     check();
   }
@@ -359,6 +361,8 @@ public class RunLengthEncoding {
 	  int j=3;
 	  int starvetime = 3;
 	  RunLengthEncoding RLE = new RunLengthEncoding(i,j,starvetime);
-	  RLE.addShark(1,1);
+	  RLE.addFish(1,1);
+	  RLE.addFish(2,1);
+	  RLE.addShark(1,2);
   }
 }
