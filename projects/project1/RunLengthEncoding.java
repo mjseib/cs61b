@@ -130,9 +130,9 @@ public class RunLengthEncoding {
 	  } 
 	  currNode = currNode.next;
 	  // This was to reach the end of the list
-	  /*if(currNode.next == runList.head) {
+	  if(currNode == runList.head) {
 		  return null;
-	  }*/
+	  }
 	  if(currNode.aniType == null) {
 		  return new TypeAndSize(Ocean.EMPTY, currNode.aniLength);
 	  } else {
