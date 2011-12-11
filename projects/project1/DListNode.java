@@ -4,7 +4,6 @@ public class DListNode {
 	public DListNode prev;
 	public Animal aniType;
 	public int aniLength;
-	public int timeDeath;
 	
 	public DListNode() {
 		next = null;

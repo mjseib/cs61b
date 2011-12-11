@@ -146,20 +146,26 @@ public class RunLengthEncoding {
 	  Ocean sea = new Ocean(i, j, starveTime);
 	  int indexTrack = 0;
 	  int listSize = runList.getSize();
+	  int feeding=0;
 	  TypeAndSize currData;
 	  
 	  for(int k = 0; k < listSize; k++) {
 		  currData = nextRun();
 		  int aniType = currData.type;
 		  int aniSize = currData.size;
+		  if(aniType == 1) {
+			  Animal currShark = currNode.aniType;
+			  feeding = ((Shark)currShark).dyingTime();
+		  }
 		  for(int count = 0; count < aniSize; count++) {
-			  int [] tuple = getTuple(indexTrack);
+			  int[] tuple = getTuple(indexTrack);
 			  if(aniType == 1) {
-				  sea.addShark(tuple[0], tuple[1]);
-				  //should be sea.addShark(tuple[0], tuple[1], starveTime);
+				  sea.addShark(tuple[0], tuple[1], feeding);
 			  } else if(aniType == 2) {
 				  sea.addFish(tuple[0], tuple[1]);
-			  } 
+			  } else {
+				  //do nothing
+			  }
 			  indexTrack++;
 		  }
 	  }
@@ -188,7 +194,53 @@ public class RunLengthEncoding {
   public RunLengthEncoding(Ocean sea) {
     // Your solution here, but you should probably leave the following line
     //   at the end.
-    check();
+	  starveTime = sea.starveTime();
+	  i=sea.width();
+	  j=sea.height();
+	  boolean sameAsPrev = true;
+	  int size = i*j;
+	  int aniCounter=1;
+	  int currType;
+	  int prevType;
+	  int prevDeath=0;
+	  // This is to get the first one (0,0) to start off
+	  int[] tuple=getTuple(0);
+	  prevType = sea.cellContents(tuple[0], tuple[1]);
+	  if(prevType == 1) {
+		  prevDeath = sea.sharkFeeding(tuple[0], tuple[1]);
+	  }
+	 
+	  for(int i=1; i<size; i++) {
+		  tuple=getTuple(i);
+		  currType = sea.cellContents(tuple[0], tuple[1]);
+		  if(currType == prevType) {
+			  if(currType == 1) {
+				  if(sea.sharkFeeding(tuple[0], tuple[1]) == prevDeath) {
+					  aniCounter++;
+				  } else if(sea.sharkFeeding(tuple[0], tuple[1]) != prevDeath) {
+					  sameAsPrev = false;
+				  } else {
+					  aniCounter++;
+				  }
+			  }
+		  } else if(currType != prevType) {
+			  sameAsPrev = false;
+		  }
+		  if(!sameAsPrev) {
+			  if(prevType == 1) {
+				  runList.insertBack(prevType, aniCounter, prevDeath);
+			  } else {
+				  runList.insertBack(prevType, aniCounter);
+			  } 
+			  sameAsPrev = true;
+			  prevType = currType;
+			  aniCounter = 1;
+			  if(currType == 1) {
+				  prevDeath = sea.sharkFeeding(tuple[0], tuple[1]);
+			  }
+		  }
+	  }
+	  check();
   }
 
   /**
@@ -234,6 +286,32 @@ public class RunLengthEncoding {
    */
 
   public void check() {
+	  int totSize = i*j;
+	  int sizeHolder = 0;
+	  TypeAndSize currData;
+	  int listSize = runList.getSize();
+	  for(int i=0; i<listSize; i++) {
+		  currData = nextRun();
+		  sizeHolder+=currData.size;
+		  if(i!=0) {
+			  //check types
+			  if(currNode.aniType == currNode.prev.aniType && currNode.aniType.getType() == 1) {
+				  if(((Shark) currNode.aniType).dyingTime() == ((Shark) currNode.prev.aniType).dyingTime()) {
+					  System.out.println("There are sharks that are next to each other");
+				  } else if(currNode.aniType == currNode.prev.aniType) {
+					  System.out.println("There are fish that are next to each other");
+				  }
+			  }
+		  }
+	  }
+	  if(sizeHolder!=totSize) {
+		  System.out.println("Wrong SIZES WITH DLIST AND OCEAN LENGTH");
+	  }
   }
-
+  
+  public static void main(String[] argv) {
+	  Ocean sea = new Ocean(3,3,3);
+	  RunLengthEncoding RLE = new RunLengthEncoding(sea);
+	  RLE.check();
+  }
 }

@@ -287,8 +287,7 @@ public class Ocean {
    */
 
   public int sharkFeeding(int x, int y) {
-    // Replace the following line with your solution.
-    return 0;
+	  return ((Shark)gridData[x][y]).dyingTime();
   }
 
 }

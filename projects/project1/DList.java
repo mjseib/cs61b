@@ -35,9 +35,25 @@ public class DList {
 		}
 		size++;
 	}
-	
+
 	public void insertBack(int type, int length) {
 		DListNode tempNode = new DListNode(type, length);
+		if(size==0) {
+			head.next = tempNode;
+			head.prev = tempNode;
+			tempNode.next = head;
+			tempNode.prev = head;
+		} else {
+			tempNode.prev=head.prev;
+			tempNode.prev.next = tempNode;
+			tempNode.next = head;
+			head.prev = tempNode;
+		}
+		size++;
+	}
+
+	public void insertBack(int type, int length, int deathTime) {
+		DListNode tempNode = new DListNode(type, length, deathTime);
 		if(size==0) {
 			head.next = tempNode;
 			head.prev = tempNode;
