@@ -29,7 +29,7 @@ public class RunLengthEncoding {
    */
 	
 	private DList runList;
-	private DListNode currNode = null;
+	private DListNode currNode;
 	private int starveTime;
 	private int i;
 	private int j;
@@ -53,6 +53,7 @@ public class RunLengthEncoding {
 	  this.j = j;
 	  this.starveTime = starveTime;
 	  runList = new DList(0, this.i*this.j);
+	  currNode = null;
   }
 
   /**
@@ -76,6 +77,7 @@ public class RunLengthEncoding {
                            int[] runTypes, int[] runLengths) {
 	  this.i = i;
 	  this.j = j;
+	  currNode = null;
 	  this.starveTime = starveTime;
 	  runList = new DList();
 	  for(int k=0; k<runTypes.length; k++) {
@@ -198,6 +200,7 @@ public class RunLengthEncoding {
   public RunLengthEncoding(Ocean sea) {
     // Your solution here, but you should probably leave the following line
     //   at the end.
+	  currNode = null;
 	  starveTime = sea.starveTime();
 	  i=sea.width();
 	  j=sea.height();
@@ -267,26 +270,68 @@ public class RunLengthEncoding {
    */
 
   public void addFish(int x, int y) {
-	  int index = x*i+y;
+	  paint(this.toOcean());
+	  int index = y*i+x;
 	  int listSize = runList.getSize();
 	  int prevIndex = 0;
 	  int currIndex = 0;
-	  TypeAndSize currData;
 	  currNode = null;
+	  System.out.println("(index, i, j): "+index+", "+i+", "+j);
 	  for(int m=0; m<listSize; m++) {
-		  currData = nextRun();
+		  TypeAndSize currData = nextRun();
 		  currIndex += currData.size;
+		  System.out.println("(m, listSize): "+m+", "+listSize);
+		  System.out.println("(prevIndex, currIndex): "+prevIndex+", "+currIndex);
 		  if(index > prevIndex && index < currIndex) {
 			  if(currNode.aniType == null) {
 				  runList.insertAfterNode(2, 1, currNode);
-				  runList.insertAfterNode(0, currIndex-index-1, currNode.next);
 				  currNode.aniLength=index - prevIndex;
-			  } 
+				  if(currIndex-index-1 != 0) {
+					  runList.insertAfterNode(0, currIndex-index-1, currNode.next);
+				  } else {
+					  // If we dont add an empty run after because the length is zero, then check if there is a fish next to it
+					  if(currNode.next.next.aniType.getType() == 2) {
+						  currNode.next.aniLength += currNode.next.next.aniLength;
+						  runList.removeAfterNode(currNode.next);
+					  }
+				  }
+			  }
+			  break;
+		  } else if(index > prevIndex && index <= currIndex) {
+			  if(currNode.next.aniType == null) {
+				  // Insert a run after the node
+				  runList.insertAfterNode(2, 1, currNode);
+				  // Format the empty run correctly
+				  if(currNode.next.next.aniLength == 1) {
+					  runList.removeAfterNode(currNode.next);
+				  } else {
+					  currNode.next.next.aniLength--;
+				  }
+				  // Checks if there is a fish to the left
+				  if(currNode.aniType.getType() == 2) {
+					  // Checks if there is one to the right ALSO
+					  if(currNode.next.next.aniType.getType() == 2) {
+						  currNode.aniLength++;
+						  currNode.aniLength+=currNode.next.next.aniLength;
+						  runList.removeAfterNode(currNode);
+						  runList.removeAfterNode(currNode);
+					  } else {
+						  currNode.aniLength++;
+						  runList.removeAfterNode(currNode);   
+					  }
+				  }
+				  // Checks if there's a fish to the right
+				  if(currNode.next.next.aniType.getType() == 2) {
+					  currNode.next.next.aniLength++;
+					  runList.removeAfterNode(currNode);
+				  }
+			  }
 			  break;
 		  }
 		  prevIndex=currIndex;
 	  }
 	  check();
+	  paint(this.toOcean());
   }
 
   /**
@@ -305,22 +350,56 @@ public class RunLengthEncoding {
 	  int listSize = runList.getSize();
 	  int prevIndex = 0;
 	  int currIndex = 0;
-	  TypeAndSize currData;
 	  currNode = null;
+	  // Loop through the list
 	  for(int m=0; m<listSize; m++) {
-		  currData = nextRun();
+		  TypeAndSize currData = nextRun();
 		  currIndex += currData.size;
+		  // This clause is if the index we want is inside a run that is empty
 		  if(index > prevIndex && index < currIndex) {
 			  if(currNode.aniType == null) {
-				  runList.insertAfterNode(2, 1, starveTime, currNode);
+				  // Add in a shark
+				  runList.insertAfterNode(1, 1, starveTime, currNode);
+				  // Add in an empty run that is of correct length
 				  runList.insertAfterNode(0, currIndex-index-1, currNode.next);
+				  // Scale the current empty run back
 				  currNode.aniLength=index - prevIndex;
 			  } 
 			  break;
 		  }
+		  // This clause is if the index we want is at the border
+		  if(index > prevIndex && index <= currIndex) {
+			  if(currNode.next.aniType == null) {
+				  // Insert a run after the node
+				  runList.insertAfterNode(1, 1, starveTime, currNode);
+				  // Format the empty run correctly
+				  if(currNode.next.next.aniLength == 1) {
+					  runList.removeAfterNode(currNode.next);
+				  } else {
+					  currNode.next.next.aniLength--;
+				  }
+				  // Checks if there is a shark to the left
+				  if(currNode.aniType.getType() == 1) {
+					  // Then check it's starveTime
+					  if(((Shark)currNode.aniType).dyingTime() == starveTime) {
+						  currNode.aniLength++;
+						  runList.removeAfterNode(currNode);
+					  }
+				  }
+				  // Checks if there's a shark to the right
+				  if(currNode.next.next.aniType.getType() == 1) {
+					  // Then check it's starveTime
+					  if(((Shark) currNode.next.next.aniType).dyingTime() == starveTime) {
+						  currNode.next.next.aniLength++;
+						  runList.removeAfterNode(currNode);
+					  }
+				  }
+			  }
+			  break;
+		  }
 		  prevIndex = currIndex;
 	  }
-    check();
+	  check();
   }
 
   /**
@@ -334,7 +413,6 @@ public class RunLengthEncoding {
 	  int sizeHolder = 0;
 	  TypeAndSize currData;
 	  int listSize = runList.getSize();
-	  System.out.println("This is totSize: " + totSize);
 	  currNode = null;
 	  for(int i=0; i<listSize; i++) {
 		  currData = nextRun();
@@ -350,11 +428,41 @@ public class RunLengthEncoding {
 			  }
 		  }
 	  }
-	  System.out.println("This is sizeHolder: " + sizeHolder);
 	  if(sizeHolder!=totSize) {
 		  System.out.println("Wrong SIZES WITH DLIST AND OCEAN LENGTH");
 	  }
   }
+  
+  public static void paint(Ocean sea) {
+	  if (sea != null) {
+		  int width = sea.width();
+		  int height = sea.height();
+
+	      /* Draw the ocean. */
+	      for (int x = 0; x < width + 2; x++) {
+	    	  System.out.print("-");
+	      }
+	      System.out.println();
+	      for (int y = 0; y < height; y++) {
+	    	  System.out.print("|");
+	    	  for (int x = 0; x < width; x++) {
+	    		  int contents = sea.cellContents(x, y);
+	    		  if (contents == Ocean.SHARK) {
+	    			  System.out.print('S');
+	    		  } else if (contents == Ocean.FISH) {
+	    			  System.out.print('~');
+	    		  } else {
+	    			  System.out.print(' ');
+	    		  }
+	    	  }
+	    	  System.out.println("|");
+	      }
+	      for (int x = 0; x < width + 2; x++) {
+	    	  System.out.print("-");
+	      }
+	      System.out.println();
+	  }
+  }	
   
   public static void main(String[] argv) {
 	  int i=3;
@@ -362,6 +470,7 @@ public class RunLengthEncoding {
 	  int starvetime = 3;
 	  RunLengthEncoding RLE = new RunLengthEncoding(i,j,starvetime);
 	  RLE.addFish(1,1);
+	  System.out.println("Looking good");
 	  RLE.addFish(2,1);
 	  RLE.addShark(1,2);
   }

@@ -30,7 +30,7 @@ class SListNode {
    *  item "obj", whose next list node is to be "next".
    */
 
-  SListNode(Object obj, SListNode next) {
+  Slistnode(Object obj, SListNode next) {
     item = obj;
     this.next = next;
     this.prev = next.prev;

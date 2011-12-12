@@ -178,8 +178,8 @@ class Date {
   public int difference(Date d) {
       int multiplier;
       int dayDiff = Math.abs(d.beginOfTime() - this.beginOfTime());
-      System.out.println("d: " + d.beginOfTime());
-      System.out.println("this: " + this.beginOfTime());
+      /*      System.out.println("d: " + d.beginOfTime());
+	      System.out.println("this: " + this.beginOfTime());*/
       if(this.isBefore(d)){
 	  multiplier = -1;
       } else if(this.isAfter(d)){
@@ -200,9 +200,8 @@ class Date {
 	
     private int beginOfTime(){
 	int numDays=0;
-	/// Calculate the days in year
 	for(int i=1; i<year; i++){
-	    numDays += daysInYear(year);
+	    numDays += daysInYear(i);
 	}
 	for(int i=1; i<month; i++){
 	    numDays += daysInMonth(i, year);
@@ -234,7 +233,9 @@ class Date {
 
     /* I recommend you write code to test the isLeapYear function! */
     System.out.println("\nTesting the leap year function.");
+    System.out.println("3 shouldn't be a leap year: " + isLeapYear(3));
     System.out.println("4 should be a leap year: " + isLeapYear(4));
+    System.out.println("1374 shouldn't be a leap year: " + isLeapYear(1374));
     System.out.println("1600 should be a leap year: " + isLeapYear(1600));
     System.out.println("1800 shouldn't be a leap year: " + isLeapYear(1800) );
     System.out.println("1900 shouldn't be a leap year: " + isLeapYear(1900) );
@@ -268,12 +269,12 @@ class Date {
 	System.out.println("Month " + i + " has " + daysInMonth(i,1800) + "days.");
     }*/
 
-    // Debugging begin of time
+    /*    // Debugging begin of time
     Date day1 = new Date("3/10/1");
     Date day2 = new Date("1/1/1");
     System.out.println("\nDebugging beginOfTime");
     System.out.println(day1 + " should be: " + day1.beginOfTime());
-    System.out.println(day2 + " should be: " + day2.beginOfTime());
+    System.out.println(day2 + " should be: " + day2.beginOfTime());*/
 
     System.out.println("\nTesting difference.");
     System.out.println(d1 + " - " + d1  + " should be 0: " + 

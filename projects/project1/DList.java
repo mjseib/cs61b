@@ -38,6 +38,12 @@ public class DList {
 		size++;
 	}
 	
+	public void removeAfterNode(DListNode curr) {
+		curr.next = curr.next.next;
+		curr.next.prev = curr;
+		size--;
+	}
+	
 	
 	public void insertFront(int type, int length) {
 		DListNode tempNode = new DListNode(type, length);
