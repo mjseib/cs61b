@@ -270,13 +270,11 @@ public class RunLengthEncoding {
    */
 
   public void addFish(int x, int y) {
-	  paint(this.toOcean());
 	  int index = y*i+x;
 	  int listSize = runList.getSize();
 	  int prevIndex = 0;
 	  int currIndex = 0;
 	  currNode = null;
-	  System.out.println("(index, i, j): "+index+", "+i+", "+j);
 	  for(int m=0; m<listSize; m++) {
 		  TypeAndSize currData = nextRun();
 		  currIndex += currData.size;
@@ -328,7 +326,6 @@ public class RunLengthEncoding {
 		  prevIndex=currIndex;
 	  }
 	  check();
-	  paint(this.toOcean());
   }
 
   /**
@@ -386,12 +383,19 @@ public class RunLengthEncoding {
 				  // Checks if there is a shark to the left
 				  if(currNode.aniType.getType() == 1) {
 					  // Checks if there is one to the right ALSO
+					/*  System.out.println(currNode.aniType.getType());
+					  System.out.println(currNode.aniLength);
+					  System.out.println(currNode.next.aniType.getType());
+					  System.out.println(currNode.next.aniLength);
+					  //System.out.println(currNode.next.next.aniType.getType());
+					  System.out.println(currNode.next.next.aniLength);
 					  if(currNode.next.next.aniType.getType() == 1) {
+						  System.out.println("Do I get here?");
 						  if(((Shark) currNode.next.next.aniType).dyingTime() == starveTime) {
 							  currNode.next.aniLength += currNode.next.next.aniLength;
 							  runList.removeAfterNode(currNode.next);
 						  }
-					  }
+					  }*/
 					  // Then check it's starveTime
 					  if(((Shark)currNode.aniType).dyingTime() == starveTime) {
 						  currNode.aniLength+=currNode.next.aniLength;
