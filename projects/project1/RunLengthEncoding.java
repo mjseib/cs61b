@@ -280,8 +280,6 @@ public class RunLengthEncoding {
 	  for(int m=0; m<listSize; m++) {
 		  TypeAndSize currData = nextRun();
 		  currIndex += currData.size;
-		  System.out.println("(m, listSize): "+m+", "+listSize);
-		  System.out.println("(prevIndex, currIndex): "+prevIndex+", "+currIndex);
 		  if(index > prevIndex && index < currIndex) {
 			  if(currNode.aniType == null) {
 				  runList.insertAfterNode(2, 1, currNode);
@@ -297,9 +295,10 @@ public class RunLengthEncoding {
 				  }
 			  }
 			  break;
-		  } else if(index > prevIndex && index <= currIndex) {
+		  } 
+		  if(index > prevIndex && index <= currIndex) {
 			  if(currNode.next.aniType == null) {
-				  // Insert a run after the node
+				  //Insert a run after the node
 				  runList.insertAfterNode(2, 1, currNode);
 				  // Format the empty run correctly
 				  if(currNode.next.next.aniLength == 1) {
@@ -319,9 +318,7 @@ public class RunLengthEncoding {
 						  currNode.aniLength++;
 						  runList.removeAfterNode(currNode);   
 					  }
-				  }
-				  // Checks if there's a fish to the right
-				  if(currNode.next.next.aniType.getType() == 2) {
+				  } else if(currNode.next.next.aniType.getType() == 2) {
 					  currNode.next.next.aniLength++;
 					  runList.removeAfterNode(currNode);
 				  }
@@ -360,10 +357,18 @@ public class RunLengthEncoding {
 			  if(currNode.aniType == null) {
 				  // Add in a shark
 				  runList.insertAfterNode(1, 1, starveTime, currNode);
-				  // Add in an empty run that is of correct length
-				  runList.insertAfterNode(0, currIndex-index-1, currNode.next);
 				  // Scale the current empty run back
 				  currNode.aniLength=index - prevIndex;
+				  // Add in an empty run that is of correct length
+				  if(currIndex-index-1 != 0) {
+					  runList.insertAfterNode(0, currIndex-index-1, currNode.next);
+				  } else {
+					  // If we dont add an empty run after because the length is zero, then check if there is a fish next to it
+					  if(currNode.next.next.aniType.getType() == 1) {
+						  currNode.next.aniLength += currNode.next.next.aniLength;
+						  runList.removeAfterNode(currNode.next);
+					  }
+				  }
 			  } 
 			  break;
 		  }
@@ -380,14 +385,20 @@ public class RunLengthEncoding {
 				  }
 				  // Checks if there is a shark to the left
 				  if(currNode.aniType.getType() == 1) {
+					  // Checks if there is one to the right ALSO
+					  if(currNode.next.next.aniType.getType() == 1) {
+						  if(((Shark) currNode.next.next.aniType).dyingTime() == starveTime) {
+							  currNode.next.aniLength += currNode.next.next.aniLength;
+							  runList.removeAfterNode(currNode.next);
+						  }
+					  }
 					  // Then check it's starveTime
 					  if(((Shark)currNode.aniType).dyingTime() == starveTime) {
-						  currNode.aniLength++;
+						  currNode.aniLength+=currNode.next.aniLength;
 						  runList.removeAfterNode(currNode);
 					  }
-				  }
-				  // Checks if there's a shark to the right
-				  if(currNode.next.next.aniType.getType() == 1) {
+				  } else if(currNode.next.next.aniType.getType() == 1) {
+					  // Checks if there's a shark to the right
 					  // Then check it's starveTime
 					  if(((Shark) currNode.next.next.aniType).dyingTime() == starveTime) {
 						  currNode.next.next.aniLength++;
