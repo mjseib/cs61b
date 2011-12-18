@@ -485,7 +485,6 @@ public class RunLengthEncoding {
 	  int starvetime = 3;
 	  RunLengthEncoding RLE = new RunLengthEncoding(i,j,starvetime);
 	  RLE.addFish(1,1);
-	  System.out.println("Looking good");
 	  RLE.addFish(2,1);
 	  RLE.addShark(1,2);
   }

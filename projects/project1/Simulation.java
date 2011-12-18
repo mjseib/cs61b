@@ -162,7 +162,7 @@ public class Simulation {
      */
 
     while (true) {                                              // Loop forever
-      Thread.sleep(1000);                // Wait one second (1000 milliseconds)
+      Thread.sleep(2000);                // Wait one second (1000 milliseconds)
       drawOcean(graphics, sea);                       // Draw the current ocean
       //  For fun, you might wish to change the delay in the next line.
       //  If you make it too short, though, the graphics won't work properly.
