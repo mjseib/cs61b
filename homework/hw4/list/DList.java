@@ -187,9 +187,12 @@ public class DList {
      *  Performance:  runs in O(1) time.
      */
     public void insertAfter(Object item, DListNode node) {
-	node.next = newNode(item, node, node.next);
-	node.next.next.prev = node.next;
-	size++;
+	if(node == null) {
+	} else {
+	    node.next = newNode(item, node, node.next);
+	    node.next.next.prev = node.next;
+	    size++;
+	}
     }
     
     /**
@@ -200,9 +203,12 @@ public class DList {
      *  Performance:  runs in O(1) time.
      */
     public void insertBefore(Object item, DListNode node) {
-	node.prev = newNode(item, node.prev, node);
-	node.prev.prev.next = node.prev;
-	size++;
+	if(node==null) {
+	} else {
+	    node.prev = newNode(item, node.prev, node);
+	    node.prev.prev.next = node.prev;
+	    size++;
+	}
     }
     
     /**
