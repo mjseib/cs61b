@@ -52,6 +52,8 @@ public class DList {
      */
     public DList() {
 	head = newNode(null, head, head);
+	head.next = head;
+	head.prev = head;
 	size = 0;
     }
     

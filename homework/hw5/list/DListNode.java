@@ -99,10 +99,9 @@ public class DListNode extends ListNode {
     //   "this" is null.  Remember that this node's "myList" field tells you
     //   what DList it's in.  You should use myList.newNode() to create the
     //   new node.
-    next = new DListNode(item, myList, this, next);
+    next = ((DList) myList).newNode(item, (DList) myList, this, next);
     next.next.prev = next;
     myList.size++;
-    
   }
 
   /**
@@ -123,10 +122,9 @@ public class DListNode extends ListNode {
     //   "this" is null.  Remember that this node's "myList" field tells you
     //   what DList it's in.  You should use myList.newNode() to create the
     //   new node.
-    prev = new DListNode(item, myList, prev, this);
+    prev = ((DList) myList).newNode(item, (DList) myList, prev, this);
     prev.prev.next = prev;
     myList.size++;
-    
   }
 
   /**

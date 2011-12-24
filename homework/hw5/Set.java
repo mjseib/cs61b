@@ -8,7 +8,9 @@ import list.*;
  **/
 public class Set {
   /* Fill in the data fields here. */
-
+    protected int size;
+    protected List list;
+    
   /**
    * Set ADT invariants:
    *  1)  The Set's elements must be precisely the elements of the List.
@@ -24,6 +26,8 @@ public class Set {
    **/
   public Set() { 
     // Your solution here.
+      size = 0;
+      list = new DList();
   }
 
   /**
@@ -33,7 +37,7 @@ public class Set {
    **/
   public int cardinality() {
     // Replace the following line with your solution.
-    return 0;
+    return size;
   }
 
   /**
@@ -46,6 +50,28 @@ public class Set {
    **/
   public void insert(Comparable c) {
     // Your solution here.
+	  if(list.isEmpty()) {	
+		  list.insertFront(c);
+	  } else {
+		  tobegin:
+			  try{
+				  ListNode currNode = list.front();
+				  while(currNode.isValidNode()) {
+					  int comparison = ((Comparable) currNode.item()).compareTo(c);
+					  if(comparison==0) {
+						  break tobegin;
+					  } else if(comparison < 0) {
+						  currNode = currNode.next();
+					  } else {
+						  currNode.insertBefore(c);
+						  break tobegin;
+					  }
+				  }
+				  list.insertBack(c);
+			  } catch(InvalidNodeException e) {
+				  System.out.println(e);
+			  }
+	  }
   }
 
   /**
@@ -101,7 +127,17 @@ public class Set {
    **/
   public String toString() {
     // Replace the following line with your solution.
-    return "";
+	  String result = "[  ";
+	  ListNode current = list.front();
+	  try {
+		  while (current.isValidNode()) {
+			  result = result + current.item() + "  ";
+			  current = current.next();
+		  } 
+	  } catch(InvalidNodeException e) {
+		  
+	  }
+	  return result + "]";
   }
 
   public static void main(String[] argv) {

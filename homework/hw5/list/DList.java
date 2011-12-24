@@ -60,6 +60,8 @@ public class DList extends List {
     // Your solution here.  Similar to Homework 4, but now you need to specify
     //   the `list' field (second parameter) as well.
       head = newNode(null, null, head, head);
+      head.next = head;
+      head.prev = head;
       size = 0;
   }
 
@@ -77,8 +79,8 @@ public class DList extends List {
 	  head.prev = newNode(item, this, head, head);
 	  head.next = head.prev;
       } else {
-	  head.prev = newNode(item, this, head.prev, head);
-	  head.prev.prev.next = head.prev;
+	  head.next = newNode(item, this, head, head.next);
+	  head.next.next.prev = head.next;
       }
       size++;
   }
