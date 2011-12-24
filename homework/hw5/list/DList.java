@@ -220,6 +220,28 @@ public class DList extends List {
   }
 
   public static void main(String[] argv) {
+	  
+	  List j = new DList();
+	  j.insertFront(new Integer(3));
+	  j.insertBack(new Integer(2));
+	  ListNode currNode = j.front();
+	  System.out.println(j.size);
+	  try {
+		  currNode.insertAfter(new Integer(4));
+	  } catch (InvalidNodeException e) {
+		  e.printStackTrace();
+	  }
+	  System.out.println(j.size);
+	  System.out.println(j);
+	  try {
+		  currNode = currNode.next();
+		  currNode.insertBefore(new Integer(19));
+	  } catch (InvalidNodeException e) {
+		  e.printStackTrace();
+	  }
+	  System.out.println(j.size);
+	  System.out.println(j);
+	  
     testEmpty();
     List l = new DList();
     l.insertFront(new Integer(3));

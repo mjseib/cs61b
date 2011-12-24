@@ -63,6 +63,7 @@ public class Set {
 					  } else if(comparison < 0) {
 						  currNode = currNode.next();
 					  } else {
+						  this.size++;
 						  currNode.insertBefore(c);
 						  break tobegin;
 					  }
@@ -91,6 +92,14 @@ public class Set {
    **/
   public void union(Set s) {
     // Your solution here.
+	  ListNode sNode = s.list.front();
+	  for(int i=0; i<s.cardinality(); i++) {
+		  try {
+			  this.insert((Comparable) sNode.item());
+		  } catch (InvalidNodeException e) {
+			  System.out.println(e);
+		  }
+	  }
   }
 
   /**
@@ -142,9 +151,13 @@ public class Set {
 
   public static void main(String[] argv) {
     Set s = new Set();
+    System.out.println(s.cardinality());
     s.insert(new Integer(3));
+    System.out.println(s.cardinality());
     s.insert(new Integer(4));
+    System.out.println(s.cardinality());
     s.insert(new Integer(3));
+    System.out.println(s.cardinality());
     System.out.println("Set s = " + s);
 
     Set s2 = new Set();
