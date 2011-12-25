@@ -52,6 +52,7 @@ public class Set {
     // Your solution here.
 	  if(list.isEmpty()) {	
 		  list.insertFront(c);
+		  size++;
 	  } else {
 		  tobegin:
 			  try{
@@ -63,12 +64,13 @@ public class Set {
 					  } else if(comparison < 0) {
 						  currNode = currNode.next();
 					  } else {
-						  this.size++;
+						  size++;
 						  currNode.insertBefore(c);
 						  break tobegin;
 					  }
 				  }
 				  list.insertBack(c);
+				  size++;
 			  } catch(InvalidNodeException e) {
 				  System.out.println(e);
 			  }
@@ -96,6 +98,7 @@ public class Set {
 	  for(int i=0; i<s.cardinality(); i++) {
 		  try {
 			  this.insert((Comparable) sNode.item());
+			  sNode = sNode.next();
 		  } catch (InvalidNodeException e) {
 			  System.out.println(e);
 		  }
@@ -117,6 +120,30 @@ public class Set {
    **/
   public void intersect(Set s) {
     // Your solution here.
+	  ListNode thisNode = list.front();
+	  ListNode sNode = s.list.front();
+	  for(int i=0; i<this.cardinality(); i++) {
+		  tobegin:
+			  try {
+				  while(sNode.isValidNode()) {
+					  int comparison = ((Comparable) thisNode.item()).compareTo(sNode.item());
+					  if(comparison==0) {
+						  thisNode = thisNode.next();
+						  break tobegin;
+					  } else if(comparison > 0) {
+						  sNode = sNode.next();
+					  } else {
+						  ListNode delNode = thisNode;
+						  thisNode = thisNode.next();
+						  delNode.remove();
+						  size--;
+						  break tobegin;
+					  }
+				  }
+			  } catch (InvalidNodeException e) {
+				  System.out.println(e);
+			  }
+	  }
   }
 
   /**
