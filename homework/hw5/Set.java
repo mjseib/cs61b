@@ -94,15 +94,32 @@ public class Set {
    **/
   public void union(Set s) {
     // Your solution here.
-	  ListNode sNode = s.list.front();
-	  for(int i=0; i<s.cardinality(); i++) {
+		  ListNode sNode = s.list.front();
+		  ListNode thisNode = list.front();
 		  try {
-			  this.insert((Comparable) sNode.item());
-			  sNode = sNode.next();
+			  for(int i=0; i<s.cardinality(); i++) {
+				  tobegin: {			  
+				  while(thisNode.isValidNode()) {
+					  int comparison = ((Comparable) sNode.item()).compareTo(thisNode.item());
+					  if(comparison==0) {
+						  sNode = sNode.next();
+						  break tobegin;
+					  } else if(comparison > 0) {
+						  thisNode = thisNode.next();
+					  } else {
+						  thisNode.insertBefore(sNode.item());
+						  this.size++;
+						  sNode = sNode.next();
+						  break tobegin;
+					  }
+				  }
+				  list.insertBack(sNode.item());
+				  size++;
+			  }
+			  }
 		  } catch (InvalidNodeException e) {
 			  System.out.println(e);
 		  }
-	  }
   }
 
   /**
@@ -178,13 +195,9 @@ public class Set {
 
   public static void main(String[] argv) {
     Set s = new Set();
-    System.out.println(s.cardinality());
     s.insert(new Integer(3));
-    System.out.println(s.cardinality());
     s.insert(new Integer(4));
-    System.out.println(s.cardinality());
     s.insert(new Integer(3));
-    System.out.println(s.cardinality());
     System.out.println("Set s = " + s);
 
     Set s2 = new Set();
