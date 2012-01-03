@@ -1,6 +1,7 @@
 /* HashTableChained.java */
 
 package dict;
+import list.*;
 
 /**
  *  HashTableChained implements a Dictionary as a hash table with chaining.
@@ -20,8 +21,7 @@ public class HashTableChained implements Dictionary {
    *  Place any data fields here.
    **/
     protected int entryNum; //n
-    protected int bucketNum;
-    protected Object[] hashArray;
+    protected List[] hashArray;
 
   /** 
    *  Construct a new empty hash table intended to hold roughly sizeEstimate
@@ -30,8 +30,8 @@ public class HashTableChained implements Dictionary {
    **/
 
   public HashTableChained(int sizeEstimate) {
-	  bucketNum = findBuckets(sizeEstimate);
-	  hashArray = new Object[bucketNum];
+      entryNum = 0;
+      hashArray = new DList[findBuckets(sizeEstimate)];
   }
 
   /** 
@@ -41,8 +41,8 @@ public class HashTableChained implements Dictionary {
 
   public HashTableChained() {
     // Your solution here.
-	  bucketNum = 97;
-	  hashArray = new Object[bucketNum];
+      entryNum = 0;
+      hashArray = new DList[97];
   }
 
   /**
@@ -55,7 +55,7 @@ public class HashTableChained implements Dictionary {
 
   int compFunction(int code) {
     // Replace the following line with your solution.
-    return 88;
+      return ((600*code+99)%2147483647)%(hashArray.length);
   }
 
   /** 
@@ -99,8 +99,19 @@ public class HashTableChained implements Dictionary {
    **/
 
   public Entry insert(Object key, Object value) {
-    // Replace the following line with your solution.
-    return null;
+      Entry enter = new Entry();
+      int bucket = Math.abs(compFunction(key.hashCode()));
+      enter.key = key;
+      enter.value = value;
+      
+      if(hashArray[bucket]==null) {
+	  hashArray[bucket] = new DList();
+      }
+      hashArray[bucket].insertBack(enter);
+      
+      entryNum++;
+
+      return enter;
   }
 
   /** 
@@ -116,8 +127,22 @@ public class HashTableChained implements Dictionary {
    **/
 
   public Entry find(Object key) {
-    // Replace the following line with your solution.
-    return null;
+      // Replace the following line with your solution.
+      int bucket = compFunction(key.hashCode());
+      try {
+	  ListNode currNode = hashArray[bucket].front();
+	  for(int i=0; i<hashArray[bucket].length(); i++) {
+	      if(((Entry) currNode.item()).key().equals(key)) {
+		  return ((Entry) currNode.item());
+	      } else {
+		  currNode = currNode.next();
+	      }
+	  }
+      } catch(InvalidNodeException e) {
+	  System.out.println(e);
+      }
+      
+      return null;
   }
 
   /** 
@@ -133,17 +158,45 @@ public class HashTableChained implements Dictionary {
    *          no entry contains the specified key.
    */
 
-  public Entry remove(Object key) {
-    // Replace the following line with your solution.
-    return null;
-  }
+    public Entry remove(Object key) {
+	// Replace the following line with your solution.
+	int bucket = compFunction(key.hashCode());
+	try {
+	    ListNode currNode = hashArray[bucket].front();
+	    for(int i=0; i<hashArray[bucket].length(); i++) {
+		if(((Entry) currNode.item()).key().equals(key)) {
+		    currNode.remove();
+		    entryNum--;
+		    return ((Entry) currNode.item());
+		} else {
+		    currNode = currNode.next();
+		}
+	    }
+	} catch(InvalidNodeException e) {
+	    System.out.println(e);
+	}
+	return null;
+    }
+    
+    /**
+     *  Remove all entries from the dictionary.
+     */
+    public void makeEmpty() {
+	// Your solution here.
+	entryNum = 0;
+	hashArray = new DList[hashArray.length];
+    }
 
-  /**
-   *  Remove all entries from the dictionary.
-   */
-  public void makeEmpty() {
-    // Your solution here.
-  }
+    public int numCollisions() {
+	int collision=0;
+	for(int i=0; i<hashArray.length; i++) {
+	    if(hashArray[i] == null) {
+	    } else {
+		collision += hashArray[i].length();
+	    }
+	}
+	return collision;
+    }
   
   private static int findBuckets(int estimate) {
 	  double loadFactor = 0.7;
@@ -172,8 +225,17 @@ public class HashTableChained implements Dictionary {
   }
   
   public static void main(String[] argv) {
-	  int primeNear = findPrimes(100);
-	  primeNear = findBuckets(100);
-	  System.out.println(primeNear);
+	  	HashTableChained table = new HashTableChained();
+	  	table.insert("WTF", "WTF");
+	  	table.insert("CAT", "MEOW");
+	  	table.insert("DOG", "BARK");
+	  	table.insert("HUMAN", "WHYYY");
+	  	table.insert(10, 10);
+	  	
+	  	Entry a = table.find("WTF");
+	  	Entry b = table.find("CAT");
+	  	table.remove("DOG");
+	  	Entry c = table.find("DOG");
+	  	System.out.println("Should be 4: "+table.size());
   }
 }
