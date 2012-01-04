@@ -1,0 +1,86 @@
+                                     GRADER
+
+Name of student running submit:
+Login of student running submit:
+
+Second team member's name:
+Second team member's login:
+
+Third team member's name (if any):
+Third team member's login:
+
+IMPORTANT:  Once you've submitted Project 2 once, the same team member should
+submit always.  If a different teammate must submit, inform cs61b@cory.eecs of
+all the details.  Include a complete list of team members, and let us know
+which submission you want graded.
+
+If you've submitted your project once, or even written a substantial amount of
+code together, you may not change partners without the permission of the
+instructor.
+===============================================================================
+Does your program compile without errors?
+
+
+Have you tested your program on the machines in the Soda CS 61B lab?
+
+
+Did you successfully implement game tree search?  Did you successfully
+implement alpha-beta pruning?  Are there any limitations on it?  What is the
+default number of search levels set by the one-parameter MachinePlayer
+constructor?
+
+
+Describe your board evaluation function in some detail.
+
+
+Does your MachinePlayer use any special method of choosing the first few moves?
+
+
+Is there anything else the graders should know to help them read your project?
+
+
+
+Describe the classes, modules, and interfaces you designed before and while you
+implemented the project.  Your description should include:
+  -  A list of the classes your program uses.
+  -  A list of each of the "modules" used in or by MachinePlayer, similar to
+     the list in the "Teamwork" section of the README (but hopefully more
+     detailed).
+  -  For each module, list the class(es) the module is implemented in.
+  -  For each module, say which of your team members implemented it.
+  -  For each module, describe its interface--specifically, the prototype and
+     behavior of each method that is available for external callers (outside
+     the module) to call.  Don't include methods that are only meant to be
+     called from within the module.
+
+     For each method, provide (1) a method prototype and (2) a complete,
+     unambiguous description of the behavior of the method/module.  This
+     description should also appear before the method in your code's comments.
+
+You will probably need to change some of your design decisions as you go; be
+sure to modify this file to reflect these changes before you submit your
+project.  Your design of classes and interfaces with be worth about 10% of your
+grade.
+
+MODULES:
+1. Determine if a valid move
+2. List of valid moves
+3. Finding chips that form a connection
+4. Determining whether a gameboard contains any networks for a given player (Anybody won?)
+5. Evaluation function for a board
+6. Performing a minimax tree search
+
+CLASSES:
+1. Board
+   public boolean isValidMove(Move move);
+   	  checks move against list of invalidmoves;
+1. 
+   
+2. Move
+3. Player
+4. MachinePlayer
+   public Move minimax(Board board, int depth);
+   	  determines the best move for the given depth on the board;
+	  uses hashtable to determine is boards have previously been found
+   public Move chooseMove();
+   	  chooses move based on minimax
