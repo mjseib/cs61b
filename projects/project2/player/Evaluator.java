@@ -5,10 +5,10 @@ import list.*;
 
 public class Evaluator {
 	
-	Board board;
+	static Board board;
 	
 	public Evaluator(Board board) {
-		this.board = board;
+		Evaluator.board = board;
 	}
 	
 	/**
@@ -65,13 +65,13 @@ public class Evaluator {
 	}
 
 	/**
-	 * isValidMoves(Move move, Player player) checks if its a valid move
+	 * isValidMoves(Move move, Player player) checks if its a valid add move
 	 * @param move the move to be checked
 	 * @param color the player's color
      * @return a boolean of whether or not the move is valid
      */
 	
-	public boolean isValidMove(Move move, int color) {
+	public static boolean isValidMove(Move move, int color) {
 		//Can't move a piece to the same spot
 		if(move.moveKind == Move.STEP) {
 			if(move.x1 == move.x2 || move.y1 == move.y2) {
@@ -83,7 +83,7 @@ public class Evaluator {
 				return false;
 			}
 			//Checks if it's trying to add out of bounds or into the corners
-			if(!Network.validPosition(new Position(move.x1, move.x2))) {
+			if(!Network.validPosition(new Position(move.x1, move.y1))) {
 				return false;
 			}
 			//Checks if it is trying to put a chip on top of another chip
@@ -95,7 +95,7 @@ public class Evaluator {
 				return false;
 			}
 			//Checks to see if there are 2+ neighbors in a box that is a radius of one away
-			SList neighborList = findNeighbors(new Position(move.x1, move.x2), color);
+			SList neighborList = findNeighbors(new Position(move.x1, move.y1), color);
 			if(neighborList.length() > 1) {
 				return false;
 			} else {
@@ -115,7 +115,7 @@ public class Evaluator {
 		return true;
 	}
 	
-	private SList findNeighbors(Position coord, int color) {
+	private static SList findNeighbors(Position coord, int color) {
 		SList neighbors = new SList();
 		
 		for(int i=coord.getX()-1; i<=coord.getX()+1; i++) {

@@ -2,8 +2,6 @@
 
 package player;
 
-import list.*;
-
 public class Board {
     protected final static int DIMENSION = 8;
     public final static int EMPTY = 0;
@@ -80,5 +78,16 @@ public class Board {
 
     public int getContent(int x, int y) {
     	return grid[x][y];
+    }
+    
+    /**
+     * sets the content at (x,y) to the color
+     * @param x
+     * @param y
+     * @param color
+     */
+    
+    public void setContent(int x, int y, int color) {
+    	grid[x][y] = color;
     }
 }
