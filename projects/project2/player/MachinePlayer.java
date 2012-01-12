@@ -17,8 +17,8 @@ public class MachinePlayer extends Player {
     protected int searchDepth;
     protected Board gameBoard;
     
-    public final int whiteWin = 100;
-    public final int blackWin = -100;
+    public final static int whiteWin = 100;
+    public final static int blackWin = -100;
 
   // Creates a machine player with the given color.  Color is either 0 (black)
   // or 1 (white).  (White has the first move.)
@@ -39,9 +39,9 @@ public class MachinePlayer extends Player {
   // Returns a new move by "this" player.  Internally records the move (updates
   // the internal game board) as a move by "this" player.
   public Move chooseMove() {
-	  BestMove best = miniMax(color, searchDepth);
-	  doMove(best.move, color);
-	  return best.move;
+	  Move best = miniMax(color, searchDepth);
+	  doMove(best, this.color);
+	  return best;
   } 
 
   // If the Move m is legal, records the move as a move by the opponent
@@ -54,13 +54,13 @@ public class MachinePlayer extends Player {
   
   private boolean doMove(Move m, int color) {
 	  if(m.moveKind == Move.ADD) {
-		  if(Evaluator.isValidMove(m, color)) {
+		  if(Evaluator.isValidMove(m, color, gameBoard)) {
 			  gameBoard.setContent(m.x1, m.y1, color);
 			  return true;
 		  }
 	  } else if(m.moveKind == Move.STEP){
 		  gameBoard.setContent(m.x2, m.y2, Board.EMPTY);
-		  if(Evaluator.isValidMove(m, color)) {
+		  if(Evaluator.isValidMove(m, color, gameBoard)) {
 			  gameBoard.setContent(m.x1, m.y1, color);
 			  return true;
 		  }
@@ -82,7 +82,7 @@ public class MachinePlayer extends Player {
    * @return the best move
    */
 
-  public BestMove miniMax(int color, int depth) {
+  public Move miniMax(int color, int depth) {
 	  int alpha = blackWin - 1;
 	  int beta = whiteWin +1;
 	  boolean side;
@@ -93,55 +93,54 @@ public class MachinePlayer extends Player {
 	  }
 	  BestMove best = moveHelper(color, side, depth, alpha, beta);
 	  
-	  return best;
+	  return best.move;
   }
   
   private BestMove moveHelper(int color, boolean side, int depth, int alpha, int beta) {
 	  BestMove myBest = new BestMove();
-	  BestMove reply = new BestMove();
+	  BestMove reply;
 	  Evaluator evaluation = new Evaluator(gameBoard);
-				  
+	  Move introMove = new Move();
+	  introMove.moveKind = Move.ADD;
+	  Random r = new Random();
+
 	  try {
 		  int chips = gameBoard.numberOfChips();
+		  System.out.println(chips);
 		  
 		  if(chips <= 2) {
-			  Move firstMove = new Move();
-			  Random r = new Random();
 			  if(color == Board.BLACK) {
-				  firstMove.y1 = 0;
-				  firstMove.x1 = r.nextInt(Board.DIMENSION-2)+1;
-				  myBest.move = firstMove;
+				  introMove.y1 = 0;
+				  introMove.x1 = r.nextInt(Board.DIMENSION-2)+1;
+				  myBest.move = introMove;
 				  return myBest;
 			  }
 			  if(color == Board.WHITE) {
-				  firstMove.x1 = 0;
-				  firstMove.y1 = r.nextInt(Board.DIMENSION-2)+1;
-				  myBest.move = firstMove;
+				  introMove.x1 = 0;
+				  introMove.y1 = r.nextInt(Board.DIMENSION-2)+1;
+				  myBest.move = introMove;
 				  return myBest;
 			  }
 		  }
 		  if(chips >2 && chips <= 4) {
-			  Move firstMove = new Move();
-			  Random r = new Random();
 			  if(color == Board.BLACK) {
-				  firstMove.y1 = Board.DIMENSION-1;
-				  firstMove.x1 = r.nextInt(Board.DIMENSION-2)+1;
-				  myBest.move = firstMove;
+				  introMove.y1 = Board.DIMENSION-1;
+				  introMove.x1 = r.nextInt(Board.DIMENSION-2)+1;
+				  myBest.move = introMove;
 				  return myBest;
 			  }
 			  if(color == Board.WHITE) {
-				  firstMove.x1 = Board.DIMENSION-1;
-				  firstMove.y1 = r.nextInt(Board.DIMENSION-2)+1;
-				  myBest.move = firstMove;
+				  introMove.x1 = Board.DIMENSION-1;
+				  introMove.y1 = r.nextInt(Board.DIMENSION-2)+1;
+				  myBest.move = introMove;
 				  return myBest;
 			  }
 		  }
-		  
 		  if(Network.hasValidNetwork(gameBoard, color) || depth == 0) {
 			  myBest.score = evaluation.boardEval(color);
 			  return myBest;
 		  }
-	  
+
 		  if(side) {
 			  myBest.score = alpha;
 		  } else {
@@ -152,9 +151,9 @@ public class MachinePlayer extends Player {
 		  for(int i=0; i<possibleMoves.length(); i++) {
 			  Move currentMove = (Move) currPossibleNode.item();
 			  Board copyBoard = gameBoard.clone();
-			  if(doMove(currentMove, color)) {
-				  reply = moveHelper(opponentColor(color),!side, depth-1, alpha, beta);
-			  }
+			  doMove(currentMove, color);
+			  reply = moveHelper(opponentColor(color),!side, depth-1, alpha, beta);
+			  
 			  gameBoard = copyBoard;
 			  if(side && (reply.score > myBest.score)) {
 				  myBest.move = currentMove;

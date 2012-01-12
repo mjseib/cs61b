@@ -63,7 +63,12 @@ public class Evaluator {
 		}
 		return myScore;
 	}
-
+	
+	public static boolean isValidMove(Move move, int color, Board board) {
+		Evaluator eval = new Evaluator(board);
+		return isValidMove(move, color);
+	}
+	
 	/**
 	 * isValidMoves(Move move, Player player) checks if its a valid add move
 	 * @param move the move to be checked
@@ -107,7 +112,7 @@ public class Evaluator {
 						return false;
 					}
 				} catch(InvalidNodeException e) {
-					System.out.println(e + " in isValidMove");
+					//System.out.println(e + " in isValidMove");
 				}
 			}
 		}
@@ -118,9 +123,9 @@ public class Evaluator {
 	private static SList findNeighbors(Position coord, int color) {
 		SList neighbors = new SList();
 		
-		for(int i=coord.getX()-1; i<=coord.getX()+1; i++) {
-			for(int j=coord.getY()-1; j<=coord.getY()+1; j++) {
-				if(!(i==coord.getX() && j==coord.getY()) && board.getContent(i, j) == color) {
+		for(int i=coord.getX()-1; i<coord.getX()+2; i++) {
+			for(int j=coord.getY()-1; j<coord.getY()+2; j++) {
+				if(!(i==coord.getX() && j==coord.getY()) && i>=0 && i<=7 && j>=0 && j<=7 && board.getContent(i, j) == color) {
 					neighbors.insertBack(new Position(i,j));
 				}
 			}

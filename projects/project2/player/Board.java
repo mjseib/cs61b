@@ -4,9 +4,9 @@ package player;
 
 public class Board {
     protected final static int DIMENSION = 8;
-    public final static int EMPTY = 0;
-    public final static int BLACK = 1;
-    public final static int WHITE = 2;
+    public final static int BLACK = 0;
+    public final static int WHITE = 1;
+    public final static int EMPTY = 2;
 
     private int blackChips;
     private int whiteChips;
@@ -31,11 +31,23 @@ public class Board {
      */
 
     public int numberOfChips() {
+ /*   	System.out.println(toString());
+    	int chipNum = 0;
+    	for(int i=0; i<DIMENSION; i++) {
+    		for(int j=0; j<DIMENSION; j++) {
+    			if(grid[i][j]!=EMPTY) {
+    				System.out.println("(" + i + "," + j + ")");
+    				System.out.println(grid[i][j]);
+    				chipNum++;
+    			}
+    		}
+    	}
+    	//return chipNum;*/
     	return blackChips + whiteChips;
     }
 
     /**
-     * numberOfChips(int color) returns the number of chips for that clor
+     * numberOfChips(int color) returns the number of chips for that color
      * @return the number of chips for the color
      */
     
@@ -88,6 +100,43 @@ public class Board {
      */
     
     public void setContent(int x, int y, int color) {
+    	int currItem = grid[x][y];
+    	if(color != EMPTY && currItem == EMPTY) {
+    		if(color == BLACK) {
+    			blackChips++;
+    		} else if(color == WHITE) {
+    			whiteChips++;
+    		}
+    	} else if(color == EMPTY && currItem != EMPTY) {
+    		if(currItem == BLACK) {
+    			blackChips--;
+    		} else if(currItem == WHITE) {
+    			whiteChips--;
+    		}
+    	}
     	grid[x][y] = color;
     }
+    
+    public String toString() {
+    	System.out.println("hiii");
+    	String output = new String();
+    	String linestring = "--------------------------\n";
+    	for(int i=0; i<DIMENSION; i++) {
+    		String startString = "|";
+    		for(int j=0; j<DIMENSION; j++) {
+    			if(grid[i][j] == BLACK) {
+    				startString = startString + "B";
+    			} else if(grid[i][j] == WHITE) {
+    				startString = startString + "W";
+    			} else if(grid[i][j] == EMPTY) {
+    				startString = startString + " ";
+    			}
+    		}
+    		startString = startString + "|\n";
+    		output = output + startString;
+    	}
+    	output = linestring + output + linestring;
+    	return output;
+    }
+    
 }
