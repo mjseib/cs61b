@@ -149,6 +149,21 @@ public class SList extends List {
 	  }
 	  return null;
   }
+  
+  public SList copy() {
+	  SList returnList = new SList();
+	  
+	  SListNode currNode = (SListNode) this.front();
+	  try {
+		  for(int i=0; i<this.length(); i++) {
+			  returnList.insertBack(currNode.item());
+			  currNode = (SListNode) currNode.next();
+		  }
+	  } catch (InvalidNodeException e) {
+		  
+	  }
+	  return returnList;
+  }
 
   /**
    *  toString() returns a String representation of this SList.

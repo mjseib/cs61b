@@ -12,6 +12,9 @@ public class Network {
 	private static final int UPR = 3;
 	private static final int DOWNL = 6;
 	private static final int DOWNR = 8;
+	
+	private static SList blackNetworks;
+	private static SList whiteNetworks;
 
 	/**
 	 * get the connections that can be found at the coordinate
@@ -25,10 +28,14 @@ public class Network {
 		SList connections = new SList();
 		Position[] cord = new Position[8];
 
-		cord[0] = hasConnect(UP, board, color, coord);
-		cord[1] = hasConnect(DOWN, board, color, coord);
-		cord[2] = hasConnect(LEFT, board, color, coord);
-		cord[3] = hasConnect(RIGHT, board, color, coord);
+		if(!(goalTending(color, coord)) && color == Board.WHITE) {
+			cord[0] = hasConnect(UP, board, color, coord);	
+			cord[1] = hasConnect(DOWN, board, color, coord);
+		}
+		if(!(goalTending(color, coord)) && color == Board.BLACK) {
+			cord[2] = hasConnect(LEFT, board, color, coord);
+			cord[3] = hasConnect(RIGHT, board, color, coord);
+		}
 		cord[4] = hasConnect(UPL, board, color, coord);
 		cord[5] = hasConnect(UPR, board, color, coord);
 		cord[6] = hasConnect(DOWNL, board, color, coord);
@@ -60,45 +67,52 @@ public class Network {
 	}
 	
 	/**
-	 * Finds if there are any networks and return them
-	 * @param board the current board
-	 * @param color the color we are looking for networks
-	 * @return a List of networks if any, otherwise null
+	 * Finds the possible networks
+	 * @param board the current game board
+	 * @param color we are looking for
+	 * @return returns the possible networks possibleNetwork
 	 */
 	
 	private static SList getNetworks(Board board, int color) {
-		SList possibleNetworks;
-		SList goodNetworks = new SList();
-		// If there are less than 6 chips, or there aren't any chips in the goal then there won't even be a network
-		if(board.numberOfChips(color) < 6 || !chipsAtGoals(board, color)) {
-			return null;
-		}
-		
-		possibleNetworks = collectPossibleNetworks(board, color);
+		SList validNetworks = null;
+		collectPossibleNetworks(board, color);
 		
 		try {
-			SListNode currPossibleNetwork = (SListNode) possibleNetworks.front();
-			while(currPossibleNetwork.isValidNode()) {
-				SList currNetworkCoords = (SList) currPossibleNetwork.item();
-				if(checkValidNetwork(currNetworkCoords)) {
-					goodNetworks.insertBack(currNetworkCoords);
+			if(color == Board.BLACK) {
+				SListNode currNode = (SListNode) blackNetworks.front();
+				while(currNode.isValidNode()) {
+					SList list = (SList) currNode.item();
+					if(!checkValidNetwork(board, list)) {
+						currNode.remove();
+					}
+					currNode = (SListNode) currNode.next();
 				}
-				currPossibleNetwork = (SListNode) currPossibleNetwork.next();
+				validNetworks = blackNetworks;
+			}
+			if(color == Board.WHITE) {
+				SListNode currNode = (SListNode) whiteNetworks.front();
+				while(currNode.isValidNode()) {
+					SList list = (SList) currNode.item();
+					if(!checkValidNetwork(board, list)) {
+						currNode.remove();
+					}
+					currNode = (SListNode) currNode.next();
+				}
+				validNetworks = whiteNetworks;
 			}
 		} catch(InvalidNodeException e) {
-			System.out.println(e);
+			
 		}
-		
-		return goodNetworks;
+		return validNetworks;
 	}
-	
+
 	/**
 	 * Checks the valid network for three in a row, or three in a diagonal
 	 * @param networkList list of the possible networks
 	 * @return true if is valid, false otherwise
 	 */
 	
-	private static boolean checkValidNetwork(SList networkPositions) {
+	private static boolean checkValidNetwork(Board board, SList networkPositions) {
 		try {
 			if(networkPositions.length() < 6) {
 				return false;
@@ -141,44 +155,113 @@ public class Network {
 	}
 	
 	/**
-	 * Finds the possible networks
-	 * @param board the current game board
-	 * @param color we are looking for
-	 * @return returns the possible networks possibleNetwork
+	 * Looks in the direction on the Board until it finds a connection or not, if it does returns it
+	 * @param dir direction to search in
+	 * @param board current game board
+	 * @param color color of the player
+	 * @param coord position we are looking around
+	 * @return the Position if there is a connection, or null if not
 	 */
 	
-	private static SList collectPossibleNetworks(Board board, int color) {
-		SList possibleNetwork = new SList();
-		SList network = new SList();
+	private static Position hasConnect(int dir, Board board, int color, Position coord) {
+		Position returnPos = null;
+		int enemyColor = MachinePlayer.opponentColor(color);
+		for(int i=1; i<Board.DIMENSION; i++) {
+			int changeX = 0;
+			int changeY = 0;
+			switch(dir) {
+			case UP:
+				changeX = coord.getX();
+				changeY = coord.getY()-i;
+				break;
+			case DOWN:
+				changeX = coord.getX();
+				changeY = coord.getY()+i;
+				break;
+			case RIGHT:
+				changeX = coord.getX()+i;
+				changeY = coord.getY();
+				break;
+			case LEFT:
+				changeX = coord.getX()-i;
+				changeY = coord.getY();
+				break;
+			case UPL:
+				changeX = coord.getX()-i;
+				changeY = coord.getY()-i;
+				break;
+			case UPR:
+				changeX = coord.getX()+i;
+				changeY = coord.getY()-1;
+				break;
+			case DOWNL:
+				changeX = coord.getX()-i;
+				changeY = coord.getY()+i;
+				break;
+			case DOWNR:
+				changeX = coord.getX()+i;
+				changeY = coord.getY()+i;
+				break;
+			}
+			if(validPosition(new Position(changeX, changeY))) {
+				if(board.getContent(changeX, changeY) == enemyColor) {
+					returnPos = null;
+					break;
+				} else if(board.getContent(changeX, changeY) == color) {
+					returnPos = new Position(changeX, changeY);
+					break;
+				}
+			} else {
+				break;
+			}
+		}
+		return returnPos;
+	}
+
+	/**
+	 * Finds if there are any networks and return them
+	 * @param board the current board
+	 * @param color the color we are looking for networks
+	 * @return a List of networks if any, otherwise null
+	 */
+	
+	private static void collectPossibleNetworks(Board board, int color) {
+		blackNetworks = new SList();
+		whiteNetworks = new SList();
+		
+		if(board.numberOfChips(color) < 6 || !chipsAtGoals(board, color)) {
+			return;
+		}
+		
 		if(color == Board.BLACK) {
 			for(int i=0; i<Board.DIMENSION; i++) {
-				if(board.getContent(i, 0) == color) {
-					Position chip = new Position(i, 0);
-					network.insertBack(chip);
-					makeConnection(board, color, network, possibleNetwork);
+				if(board.getContent(i, Board.DIMENSION-1) == color) {
+					Position chipPair = new Position(i, Board.DIMENSION-1);
+					SList network = new SList();
+					network.insertBack(chipPair);
+					makeConnection(board, color, network);
 				}
 			}
 		}
 		if(color == Board.WHITE) {
-			for(int j=0; j<Board.DIMENSION; j++) {
-				if(board.getContent(0, j) == color) {
-					Position chip = new Position(0, j);
-					network.insertBack(chip);
-					makeConnection(board, color, network, possibleNetwork);
+			for(int i=0; i<Board.DIMENSION; i++) {
+				if(board.getContent(0, i) == color) {
+					Position chipPair = new Position(0, i);
+					SList network = new SList();
+					network.insertBack(chipPair);
+					makeConnection(board, color, network);
 				}
 			}
 		}
-		return possibleNetwork;
 	}
-	
+
 	/**
 	 * Called recursively and when it finds a network across, puts it in possibleNetwork
 	 * @param board the current game board
 	 * @param color we are looking for
 	 * @param network this is where the network is built up in
-	 * @param possibleNetwork where the found network will be put into
 	 */
-	private static void makeConnection(Board board, int color, SList network, SList possibleNetwork) {
+	private static void makeConnection(Board board, int color, SList network) {
 		try {
 			Position pos = (Position) network.back().item();
 			
@@ -187,15 +270,18 @@ public class Network {
 				return;
 			}
 			// If the last piece is a end goal piece, put it on the possibleNetwork
-			if(endGoalTending(color, pos)) {
-				possibleNetwork.insertBack(network);
+			if(color == Board.BLACK && pos.getY()==0) {
+				blackNetworks.insertBack(network);
+			} else if(color == Board.WHITE && pos.getX()==(Board.DIMENSION-1)) {
+				whiteNetworks.insertBack(network);
 			} else {
 				for(int i=UPL; i<=DOWNR; i++) {
 					if(hasConnect(i, board, color, pos) != null) {
-						Position connection = hasConnect(i, board, color, pos);
+						Position connection = hasConnect(i,board,color,pos);
 						if(network.find(connection) == null) {
-							network.insertBack(connection);
-							makeConnection(board, color, network, possibleNetwork);
+							SList newList = network.copy();
+							newList.insertBack(connection);
+							makeConnection(board, color, newList);
 						}
 					}
 				}
@@ -204,7 +290,7 @@ public class Network {
 			System.out.println(e + "at checkConnection");
 		}
 	}
-	
+
 	/**
 	 * Sees if the position is in the starting goal
 	 * @param color color we are looking for
@@ -214,36 +300,13 @@ public class Network {
 	
 	private static boolean startGoalTending(int color, Position coord) {
 		if(color == Board.BLACK) {
-			if(coord.getY() == 0) {
+			if(coord.getY() == 7) {
 				return true;
 			}
 		}
 		
 		if(color == Board.WHITE) {
 			if(coord.getX() == 0) {
-				return true;
-			}
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Sees if the position is in the ending goal
-	 * @param color color we are looking for
-	 * @param coord coordinate we are checking to see if it is in the color's end goal
-	 * @return true if it is, false otherwise
-	 */
-	
-	private static boolean endGoalTending(int color, Position coord) {
-		if(color == Board.BLACK) {
-			if(coord.getY() == Board.DIMENSION-1) {
-				return true;
-			}
-		}
-		
-		if(color == Board.WHITE) {
-			if(coord.getX() == Board.DIMENSION-1) {
 				return true;
 			}
 		}
@@ -298,72 +361,6 @@ public class Network {
 		}
 		
 		return false;
-	}
-	
-	/**
-	 * Looks in the direction on the Board until it finds a connection or not, if it does returns it
-	 * @param dir direction to search in
-	 * @param board current game board
-	 * @param color color of the player
-	 * @param coord position we are looking around
-	 * @return the Position if there is a connection, or null if not
-	 */
-	
-	private static Position hasConnect(int dir, Board board, int color, Position coord) {
-		// If it's WHITE, in the goal, and searching UP/DOWN, then don't care
-		if(goalTending(color, coord) && color == Board.WHITE && (dir == UP || dir == DOWN)) {
-			return null;
-		}
-		// If it's BLACK, in the goal, and searching LEFT/RIGHT, then don't care
-		if(goalTending(color, coord) && color == Board.BLACK && (dir == LEFT || dir == RIGHT)) {
-			return null;
-		}
-		int changeX = 0;
-		int changeY = 0;
-		switch(dir) {
-		case UP:
-			changeY = -1;
-			break;
-		case DOWN:
-			changeY = 1;
-			break;
-		case RIGHT:
-			changeX = 1;
-			break;
-		case LEFT:
-			changeX = -1;
-			break;
-		case UPL:
-			changeY = -1;
-			changeX = -1;
-			break;
-		case UPR:
-			changeY = -1;
-			changeX = 1;
-			break;
-		case DOWNL:
-			changeY = 1;
-			changeX = -1;
-			break;
-		case DOWNR:
-			changeY = 1;
-			changeX = 1;
-			break;
-		}
-		
-		Position newCord = new Position(coord.getX() + changeX, coord.getY() + changeY);
-		while(validPosition(newCord)) {
-			int thisContent = board.getContent(newCord.getX(), newCord.getY());
-			if(thisContent == color) {
-				return newCord;
-			} else if(thisContent == Board.EMPTY) {
-				newCord = new Position(newCord.getX()+changeX, newCord.getY()+changeY);
-			} else {
-				return null;
-			}
-		}
-
-		return null;
 	}
 	
 	/**

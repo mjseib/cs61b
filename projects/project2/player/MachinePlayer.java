@@ -11,7 +11,7 @@ import list.*;
  */
 public class MachinePlayer extends Player {
 
-	private final int DEPTH = 1;
+	private final int DEPTH = 2;
 	
     protected int color;
     protected int searchDepth;
@@ -53,14 +53,18 @@ public class MachinePlayer extends Player {
   }
   
   private boolean doMove(Move m, int color) {
+	  Evaluator evaluation = new Evaluator(gameBoard);
 	  if(m.moveKind == Move.ADD) {
-		  if(Evaluator.isValidMove(m, color, gameBoard)) {
+		  if(evaluation.isValidMove(m, color)) {
 			  gameBoard.setContent(m.x1, m.y1, color);
 			  return true;
 		  }
 	  } else if(m.moveKind == Move.STEP){
 		  gameBoard.setContent(m.x2, m.y2, Board.EMPTY);
-		  if(Evaluator.isValidMove(m, color, gameBoard)) {
+		  if(!evaluation.isValidMove(m, color)) {
+			  gameBoard.setContent(m.x2, m.y2, color);
+			  return false;
+		  } else if(evaluation.isValidMove(m, color)) {
 			  gameBoard.setContent(m.x1, m.y1, color);
 			  return true;
 		  }
@@ -99,62 +103,61 @@ public class MachinePlayer extends Player {
   private BestMove moveHelper(int color, boolean side, int depth, int alpha, int beta) {
 	  BestMove myBest = new BestMove();
 	  BestMove reply;
-	  Evaluator evaluation = new Evaluator(gameBoard);
-	  Move introMove = new Move();
-	  introMove.moveKind = Move.ADD;
+	  
 	  Random r = new Random();
-
-	  try {
-		  int chips = gameBoard.numberOfChips();
-		  System.out.println(chips);
-		  
-		  if(chips <= 2) {
-			  if(color == Board.BLACK) {
-				  introMove.y1 = 0;
-				  introMove.x1 = r.nextInt(Board.DIMENSION-2)+1;
-				  myBest.move = introMove;
-				  return myBest;
-			  }
-			  if(color == Board.WHITE) {
-				  introMove.x1 = 0;
-				  introMove.y1 = r.nextInt(Board.DIMENSION-2)+1;
-				  myBest.move = introMove;
-				  return myBest;
-			  }
-		  }
-		  if(chips >2 && chips <= 4) {
-			  if(color == Board.BLACK) {
-				  introMove.y1 = Board.DIMENSION-1;
-				  introMove.x1 = r.nextInt(Board.DIMENSION-2)+1;
-				  myBest.move = introMove;
-				  return myBest;
-			  }
-			  if(color == Board.WHITE) {
-				  introMove.x1 = Board.DIMENSION-1;
-				  introMove.y1 = r.nextInt(Board.DIMENSION-2)+1;
-				  myBest.move = introMove;
-				  return myBest;
-			  }
-		  }
-		  if(Network.hasValidNetwork(gameBoard, color) || depth == 0) {
-			  myBest.score = evaluation.boardEval(color);
+	  Move firstMove = new Move();
+	  firstMove.moveKind = Move.ADD;
+	  
+	  Evaluator evaluation = new Evaluator(gameBoard);
+	  
+	  int chips = gameBoard.numberOfChips();
+	  if(chips <= 2) {
+		  if(color == Board.BLACK) {
+			  firstMove.y1 = 0;
+			  firstMove.x1 = r.nextInt(Board.DIMENSION-2)+1;
+			  myBest.move=firstMove;
 			  return myBest;
 		  }
-
-		  if(side) {
-			  myBest.score = alpha;
-		  } else {
-			  myBest.score = beta;
+		  if(color == Board.WHITE){
+			  firstMove.x1 = 0;
+			  firstMove.y1 = r.nextInt(Board.DIMENSION-2)+1;
+			  myBest.move = firstMove;
+			  return myBest;
 		  }
-		  SList possibleMoves = generateMoves(color);
-		  SListNode currPossibleNode = (SListNode) possibleMoves.front();
-		  for(int i=0; i<possibleMoves.length(); i++) {
-			  Move currentMove = (Move) currPossibleNode.item();
-			  Board copyBoard = gameBoard.clone();
+	  }
+	  if(chips >2 && chips <= 4) {
+		  if(color == Board.BLACK) {
+			  firstMove.y1 = Board.DIMENSION-1;
+			  firstMove.x1 = r.nextInt(Board.DIMENSION-2)+1;
+			  myBest.move = firstMove;
+			  return myBest;
+		  }
+		  if(color == Board.WHITE) {
+			  firstMove.x1 = Board.DIMENSION-1;
+			  firstMove.y1 = r.nextInt(Board.DIMENSION-2)+1;
+			  myBest.move = firstMove;
+			  return myBest;
+		  }
+	  }
+	  if(evaluation.winningBoard() || depth == 0) {
+		  myBest.score = evaluation.boardEval(color);
+	  }
+	  
+	  if(side) {
+		  myBest.score = alpha;
+	  } else {
+		  myBest.score = beta;
+	  }
+	  
+	  try {
+		  SList validMoves = evaluation.generateMoves(color);
+		  SListNode currNode = (SListNode) validMoves.front();
+		  for(int i=0; i<validMoves.length(); i++) {
+			  Board tempBoard = gameBoard.clone();
+			  Move currentMove = (Move) currNode.item();
 			  doMove(currentMove, color);
-			  reply = moveHelper(opponentColor(color),!side, depth-1, alpha, beta);
-			  
-			  gameBoard = copyBoard;
+			  reply = moveHelper(MachinePlayer.opponentColor(color), !side, depth-1, alpha, beta);
+			  gameBoard = tempBoard;
 			  if(side && (reply.score > myBest.score)) {
 				  myBest.move = currentMove;
 				  myBest.score = reply.score;
@@ -163,19 +166,20 @@ public class MachinePlayer extends Player {
 				  myBest.move = currentMove;
 				  myBest.score = reply.score;
 				  beta = reply.score;
-			  } 
+			  }
 			  if(alpha >= beta) {
 				  return myBest;
 			  }
 		  }
-	  } catch (InvalidNodeException e) {
-		  System.out.println(e + "in movehelper");
+	  } catch(InvalidNodeException e) {
+		  
 	  }
-	return myBest;
+	  return myBest;
   }
   
-  private SList generateMoves(int color) {
+  /*private SList generateMoves(int color) {
 	  SList validMoves = new SList();
+	  Evaluator evaluation = new Evaluator(gameBoard);
 	  try {
 		  if(gameBoard.numberOfChips(color) < 10) {
 			  //Generates the add moves
@@ -183,7 +187,7 @@ public class MachinePlayer extends Player {
 				  for(int j=0; j<Board.DIMENSION; j++) {
 					  if(gameBoard.getContent(i,j) == Board.EMPTY) {
 						  Move addMove = new Move(i,j);
-						  if(Evaluator.isValidMove(addMove, color)) {
+						  if(evaluation.isValidMove(addMove, color)) {
 							  validMoves.insertBack(addMove);
 						  }
 					  }
@@ -213,7 +217,7 @@ public class MachinePlayer extends Player {
 					  Move stepMove = new Move(emptyPosition.getX(), emptyPosition.getY(), chipPosition.getX(), chipPosition.getY());
 					  
 					  gameBoard.setContent(stepMove.x2, stepMove.y2, Board.EMPTY);
-					  if(Evaluator.isValidMove(stepMove, color)) {
+					  if(evaluation.isValidMove(stepMove, color)) {
 						  validMoves.insertBack(stepMove);
 					  }
 					  gameBoard.setContent(stepMove.x2, stepMove.y2, color);
@@ -227,7 +231,7 @@ public class MachinePlayer extends Player {
 		  System.out.println(e + "in move generations");
 	  }
 	return validMoves;
-  }
+  }*/
 
 /**
    * Just a helper function to get opponent's color

@@ -3,7 +3,7 @@
 package player;
 
 public class Board {
-    protected final static int DIMENSION = 8;
+    public final static int DIMENSION = 8;
     public final static int BLACK = 0;
     public final static int WHITE = 1;
     public final static int EMPTY = 2;
@@ -31,18 +31,6 @@ public class Board {
      */
 
     public int numberOfChips() {
- /*   	System.out.println(toString());
-    	int chipNum = 0;
-    	for(int i=0; i<DIMENSION; i++) {
-    		for(int j=0; j<DIMENSION; j++) {
-    			if(grid[i][j]!=EMPTY) {
-    				System.out.println("(" + i + "," + j + ")");
-    				System.out.println(grid[i][j]);
-    				chipNum++;
-    			}
-    		}
-    	}
-    	//return chipNum;*/
     	return blackChips + whiteChips;
     }
 
@@ -54,8 +42,10 @@ public class Board {
     public int numberOfChips(int color) {
     	if(color == WHITE) {
     		return whiteChips;
-    	} else {
+    	} else if(color == BLACK){
     		return blackChips;
+    	} else {
+    		return -1;
     	}
     }
 
@@ -80,6 +70,8 @@ public class Board {
     			clones.grid[i][j] = this.getContent(i, j);
     		}
     	}
+    	clones.whiteChips = whiteChips;
+    	clones.blackChips = blackChips;
     	return clones;
     }
     

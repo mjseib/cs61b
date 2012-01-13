@@ -5,10 +5,14 @@ import list.*;
 
 public class Evaluator {
 	
-	static Board board;
+	private Board board;
 	
 	public Evaluator(Board board) {
-		Evaluator.board = board;
+		this.board = board;
+	}
+	
+	public void setBoard(Board board) {
+		this.board = board;
 	}
 	
 	/**
@@ -28,10 +32,7 @@ public class Evaluator {
 	
 	public int boardEval(int color) {
 		int myScore = 0;
-		if(board.numberOfChips()>2) {
-			if(Network.hasValidNetwork(board, color)) {
-				return 100;
-			} 
+		if(board.numberOfChips() > 2) {
 			if(Network.hasValidNetwork(board, MachinePlayer.opponentColor(color))) {
 				return -100;
 			}
@@ -49,7 +50,7 @@ public class Evaluator {
 							} else {
 								ownConnects += connections.length();
 							}
-						} else {
+						} else if (gridPiece == MachinePlayer.opponentColor(color)) {
 							if(Network.goalTending(MachinePlayer.opponentColor(color), currPos)) {
 								enemyConnects += connections.length()*2;
 							} else {
@@ -64,11 +65,6 @@ public class Evaluator {
 		return myScore;
 	}
 	
-	public static boolean isValidMove(Move move, int color, Board board) {
-		Evaluator eval = new Evaluator(board);
-		return isValidMove(move, color);
-	}
-	
 	/**
 	 * isValidMoves(Move move, Player player) checks if its a valid add move
 	 * @param move the move to be checked
@@ -76,7 +72,7 @@ public class Evaluator {
      * @return a boolean of whether or not the move is valid
      */
 	
-	public static boolean isValidMove(Move move, int color) {
+	public boolean isValidMove(Move move, int color) {
 		//Can't move a piece to the same spot
 		if(move.moveKind == Move.STEP) {
 			if(move.x1 == move.x2 || move.y1 == move.y2) {
@@ -120,12 +116,13 @@ public class Evaluator {
 		return true;
 	}
 	
-	private static SList findNeighbors(Position coord, int color) {
+	private SList findNeighbors(Position coord, int color) {
 		SList neighbors = new SList();
 		
 		for(int i=coord.getX()-1; i<coord.getX()+2; i++) {
 			for(int j=coord.getY()-1; j<coord.getY()+2; j++) {
-				if(!(i==coord.getX() && j==coord.getY()) && i>=0 && i<=7 && j>=0 && j<=7 && board.getContent(i, j) == color) {
+				if(!(i==coord.getX() && j==coord.getY()) && i>=0 && i<=7 && j>=0 && j<=7)
+					if(board.getContent(i, j) == color) {
 					neighbors.insertBack(new Position(i,j));
 				}
 			}
@@ -133,5 +130,62 @@ public class Evaluator {
 		
 		return neighbors;
 	}
+	
+	 public SList generateMoves(int color) {
+		  SList validMoves = new SList();
+		  try {
+			  if(board.numberOfChips(color) >= 10) {
+
+				  //Generate the step moves
+				  SList emptyList = new SList();
+				  SList chipList = new SList();
+				  for(int i=0; i<Board.DIMENSION; i++) {
+					  for(int j=0; j<Board.DIMENSION; j++) {
+						  Position currPosition = new Position(i,j);
+						  if(board.getContent(i,j) == Board.EMPTY) {
+							  emptyList.insertBack(currPosition);
+						  } else if(board.getContent(i,j) == color){
+							  chipList.insertBack(currPosition);
+						  }
+					  }
+				  }
+
+				  SListNode chipNode = (SListNode) chipList.front();
+				  for(int i=0; i<chipList.length(); i++) {
+					  SListNode emptyNode = (SListNode) emptyList.front();
+					  for(int j=0; j<emptyList.length(); j++) {
+						  Position emptyPosition = (Position) emptyNode.item();
+						  Position chipPosition = (Position) chipNode.item();
+						  Move stepMove = new Move(emptyPosition.getX(), emptyPosition.getY(), chipPosition.getX(), chipPosition.getY());
+						  
+						  board.setContent(stepMove.x2, stepMove.y2, Board.EMPTY);
+						  if(isValidMove(stepMove, color)) {
+							  validMoves.insertBack(stepMove);
+						  }
+						  board.setContent(stepMove.x2, stepMove.y2, color);
+						  emptyNode = (SListNode) emptyNode.next();
+					  }
+					  chipNode = (SListNode) chipNode.next();
+				  }
+				  
+			  
+			  } else  {
+				  //Generates the add moves
+				  for(int i=0; i<Board.DIMENSION; i++) {
+					  for(int j=0; j<Board.DIMENSION; j++) {
+						  if(board.getContent(i,j) == Board.EMPTY) {
+							  Move addMove = new Move(i,j);
+							  if(isValidMove(addMove, color)) {
+								  validMoves.insertBack(addMove);
+							  }
+						  }
+					  }
+				  }
+			  }
+		  } catch (InvalidNodeException e) {
+			  System.out.println(e + "in move generations");
+		  }
+		return validMoves;
+	  }
 
 }
