@@ -138,15 +138,14 @@ class SibTreeNode extends TreeNode {
    *  the new item is inserted as the last child.  If c < 1, act as if c is 1.
    */
   public void insertChild(Object item, int c) throws InvalidNodeException {
-	  SibTreeNode newNode = new SibTreeNode(myTree, item);
-	  newNode.parent = this;
 	  if(!this.isValidNode()) {
 		  throw new InvalidNodeException("Invalid node so cannot insert child");
 	  }
+	  SibTreeNode newNode = new SibTreeNode(myTree, item);
+	  newNode.parent = this;
 	  if(c<=1) {
 		  newNode.nextSibling = this.firstChild;
 		  this.firstChild = newNode;
-		  myTree.size++;
 	  } else {
 		  SibTreeNode childNode = (SibTreeNode) this.child(c-1);
 		  if(!childNode.isValidNode()) {
@@ -157,8 +156,8 @@ class SibTreeNode extends TreeNode {
 		  }
 		  newNode.nextSibling = childNode.nextSibling;
 		  childNode.nextSibling = newNode;
-		  myTree.size++;
 	  }
+	  myTree.size++;
 	  return;
   }
 
@@ -172,21 +171,22 @@ class SibTreeNode extends TreeNode {
 	  if(!this.isValidNode()) {
 		  throw new InvalidNodeException("Cant remove since it isn't a valid node");
 	  }
-	  if(myTree.root() == this) {
-		  this.valid = false;
-		  myTree.root = null;
-		  myTree.size--;
-	  } else if(this.firstChild == null) {
-		  SibTreeNode kid = parent.firstChild;
-		  if(kid == this) {
-			  parent.firstChild = this.nextSibling;
+	  if(this.firstChild == null) {
+		  if(myTree.root == this) {
 			  this.valid = false;
+			  myTree.root = null;
 		  } else {
-			  while(kid.nextSibling!=this) {
-				  kid = kid.nextSibling;
+			  SibTreeNode kid = parent.firstChild;
+			  if(kid == this) {
+				  parent.firstChild = this.nextSibling;
+				  this.valid = false;
+			  } else {
+				  while(kid.nextSibling!=this) {
+					  kid = kid.nextSibling;
+				  }
+				  kid.nextSibling = this.nextSibling;
+				  this.valid = false;
 			  }
-			  kid.nextSibling = this.nextSibling;
-			  this.valid = false;
 		  }
 		  myTree.size--;
 	  }
