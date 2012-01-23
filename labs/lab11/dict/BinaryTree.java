@@ -1,4 +1,4 @@
-	/* BinaryTree.java */
+/* BinaryTree.java */
 
 package dict; 
 
@@ -155,26 +155,10 @@ public Entry remove(Object key) {
 		  } else if (root.leftChild == null && root.rightChild != null) {
 			  root = root.rightChild;
 			  root.parent = null;
-			/*  BinaryTreeNode replacementNode = findSmallest(root.rightChild);
-			  if(replacementNode == root.rightChild) {
-				  root = replacementNode;
-				  root.parent = null;
-			  } else {
-				  if(replacementNode.rightChild != null) {
-					  replacementNode.parent.leftChild = replacementNode.rightChild;
-					  replacementNode.rightChild.parent = replacementNode.parent;
-				  } else {
-					  replacementNode.parent.leftChild = null;
-				  }
-				  replacementNode.rightChild = root.rightChild;
-				  root = replacementNode;
-				  root.parent = null;*/
 		  } else {
 			  BinaryTreeNode replacementNode = findSmallest(root.rightChild);
 			  if(replacementNode == root.rightChild) {
 				  replacementNode.leftChild = root.leftChild;
-				  root = replacementNode;
-				  root.parent = null;
 			  } else {
 				  if(replacementNode.rightChild!=null) {
 					  replacementNode.parent.leftChild = replacementNode.rightChild;
@@ -186,9 +170,9 @@ public Entry remove(Object key) {
 				  replacementNode.rightChild = root.rightChild;
 				  root.leftChild.parent = replacementNode;
 				  root.rightChild.parent = replacementNode;
-				  root = replacementNode;
-				  root.parent = null;
 			  }
+			  root = replacementNode;
+			  root.parent = null;
 		  }
 	  } else {
 		  if(removeNode.leftChild == null && removeNode.rightChild == null) {
@@ -200,32 +184,28 @@ public Entry remove(Object key) {
 		  } else if(removeNode.leftChild == null && removeNode.rightChild != null) {
 			  if(((Comparable<Object>) removeNode.entry.key).compareTo(removeNode.parent.entry.key) > 0) {
 				  removeNode.parent.rightChild = removeNode.rightChild;
-				  removeNode.rightChild.parent = removeNode.parent;
 			  } else {
 				  removeNode.parent.leftChild = removeNode.rightChild;
-				  removeNode.rightChild.parent = removeNode.parent;
 			  }
+			  removeNode.rightChild.parent = removeNode.parent;
 		  } else if(removeNode.leftChild != null && removeNode.rightChild == null) {
 			  if(((Comparable<Object>) removeNode.entry.key).compareTo(removeNode.parent.entry.key) > 0) {
 				  removeNode.parent.rightChild = removeNode.leftChild;
-				  removeNode.leftChild.parent = removeNode.parent;
 			  } else {
 				  removeNode.parent.leftChild = removeNode.leftChild;
-				  removeNode.leftChild.parent = removeNode.parent;
 			  }
+			  removeNode.leftChild.parent = removeNode.parent;
 		  } else {
 			  int comparison = ((Comparable<Object>) removeNode.entry.key).compareTo(removeNode.parent.entry.key());
 			  BinaryTreeNode replacementNode = findSmallest(removeNode.rightChild);
 			  if(replacementNode == removeNode.rightChild) {
 				  if(comparison > 0) {
 					  removeNode.parent.rightChild = removeNode.rightChild;
-					  removeNode.rightChild.leftChild = removeNode.leftChild;
-					  removeNode.leftChild.parent = removeNode.rightChild;
 				  } else {
 					  removeNode.parent.leftChild = removeNode.rightChild;
-					  removeNode.rightChild.leftChild = removeNode.leftChild;
-					  removeNode.leftChild.parent = removeNode.rightChild;
 				  }
+				  removeNode.rightChild.leftChild = removeNode.leftChild;
+				  removeNode.leftChild.parent = removeNode.rightChild;
 				  replacementNode.parent = removeNode.parent;
 			  } else {
 				  if(replacementNode.rightChild != null) {
