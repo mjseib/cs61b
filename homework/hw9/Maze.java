@@ -58,14 +58,65 @@ public class Maze {
     // Create all of the vertical interior walls.
     if (horiz > 1) {
       vWalls = new boolean[horiz - 1][vert];
-      for (i = 0; i < horiz - 1; i++) {
-        for (j = 0; j < vert; j++) {
+      for (i=0; i < horiz - 1; i++) {
+        for (j=0; j < vert; j++) {
           vWalls[i][j] = true;
         }
       }
     }
-
-
+    // Create all the horizontal walls
+    if(vert>1) {
+    	hWalls = new boolean[horiz][vert-1];
+    	for(i=0; i<horiz; i++) {
+    		for(j=0; j<vert-1; j++) {
+    			hWalls[i][j] = true;
+    		}
+    	}
+    }
+    
+    DisjointSets myMaze = new DisjointSets(horiz*vert);
+    int[] myWalls = new int[(vert-1) * horiz + (horiz-1) * vert];
+    int l = -1 * horiz * (vert-1);
+    int k = 0;
+    while (l< (horiz-1) * vert) {
+    	myWalls[k] = l;
+    	k++;
+    	l++;
+    }
+    for(i=myWalls.length; i>0; i--) {
+    	int r=randInt(i);
+    	int nextLast = myWalls[i-1];
+    	int rWall = myWalls[r];
+    	myWalls[i-1]=rWall;
+    	myWalls[r]=nextLast;
+    }
+    for(i=0; i<myWalls.length; i++) {
+    	int c=myWalls[i];
+    	if(c<0) {
+    		c=-1*(c+1);
+    		int xTop = c/(vert-1);
+    		int yTop = c%(vert-1);
+    		int xBottom = xTop;
+    		int yBottom = yTop +1;
+    		int cTop = yTop*horiz+xTop;
+    		int cBottom = yBottom*horiz+xBottom;
+    		if(myMaze.find(cTop)!=myMaze.find(cBottom)) {
+    			hWalls[xTop][yTop]=false;
+    			myMaze.union(myMaze.find(cTop), myMaze.find(cBottom));
+    		}
+    	} else {
+    		int xLeft = c%(horiz-1);
+    		int yLeft = c/(horiz-1);
+    		int xRight = xLeft+1;
+    		int yRight = yLeft;
+    		int cRight = yRight*horiz+xRight;
+    		int cLeft = yLeft*horiz+xLeft;
+    		if(myMaze.find(cRight)!=myMaze.find(cLeft)) {
+    			vWalls[xLeft][yLeft]=false;
+    			myMaze.union(myMaze.find(cRight), myMaze.find(cLeft));
+    		}
+    	}
+    }
 
     /**
      * Fill in the rest of this method.  You should go through all the walls of
